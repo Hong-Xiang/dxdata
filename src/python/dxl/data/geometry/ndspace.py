@@ -178,6 +178,9 @@ class PointsWithValue(DataNDArray):
         super().__init__(data)
         if dim_point is None:
             dim_point = data.shape[1] - 1
+            self._squeeze = True
+        else:
+            self._squeeze = False
         self._dim_point = dim_point
 
     def dim_point(self):
@@ -188,3 +191,14 @@ class PointsWithValue(DataNDArray):
 
     def nb_samples(self):
         return self.data().shape[0]
+
+    def histogram(self, grid_spec: GridSpec) -> DataNDArray:
+        index = grid_index(self.d[:, :self.dim_point()], gird_spec)
+        mask = inbound_mask(self.d[:, :self.dim_point()], grid_spec)
+        new_shape = list(grid_spec.shape()) + [1] * self.dim_value()
+        result = np.zeros(new_shape)
+        for i in range(index.shape[0]):
+            if not mask[i]:
+                continue
+            result[list(index[i, :])] += self.d[i, self.dim_point():]
+        return DataNDArray(result)
