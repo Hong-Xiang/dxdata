@@ -1,8 +1,8 @@
 from dxl.fs import Path
 from .core import Data
+import pandas as pd
 
-
-class DataCSV():
+class DataCSV(Data):
     def __init__(self, path: str):
         super().__init__(Path(path))
 

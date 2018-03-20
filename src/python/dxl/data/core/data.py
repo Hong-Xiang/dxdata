@@ -1,6 +1,6 @@
 from enum import Enum
 from functools import reduce
-from typing import Iterable
+from typing import Iterable, Tuple
 
 import numpy as np
 import pandas as pd
@@ -20,7 +20,7 @@ class Data:
         return cls(data)
 
     def to(self, constructor):
-        return constructor(self.data)
+        return constructor(self.data())
 
     def data(self):
         return self._data
@@ -39,19 +39,22 @@ class DataIterable(Data):
     """
 
     def __init__(self, data: Iterable[Data]):
-        super(data)
+        super().__init__(data)
 
     def map(self, func) -> 'DataIterable':
-        return DataIterable(map(func, self.d))
+        return DataIterable(list(map(func, self.d)))
 
     def filter(self, func) -> 'DataIterable':
-        return DataIterable(filter(func, self.d))
+        return DataIterable(list(filter(func, self.d)))
 
     def map_call(self, func_name, *args, **kwargs) -> 'DataIterable':
         """
         Call member method with func_name for each entry of data.
         """
         return self.map(lambda x: getattr(x, func_name)(*args, **kwargs))
+
+    def map_to(self, constructor) -> 'DataIterable':
+        return self.map(lambda x: constructor(x))
 
     def zip(self, data: 'DataIterable'):
         return DataIterable(zip(self.d, data.d))
@@ -65,7 +68,7 @@ class DataIterable(Data):
     def flatten(self) -> 'DataIterable':
         result = []
         for d in self.data():
-            if not isinstance(d, Results):
+            if not isinstance(d, DataIterable):
                 raise TypeError(
                     "Flatten requires Results of Results, got {}.".format(type(d)))
             result += d.to_list()
@@ -91,10 +94,49 @@ class DataIterable(Data):
             yield d
 
 
+class DataIterableWithKeys(DataIterable):
+    def __init__(self, data: Iterable[Tuple]):
+        if isinstance(data, DataIterable):
+            super().__init__(data.data())
+        elif isinstance(data, dict):
+            super().__init__(data.items())
+        else:
+            super().__init__(data)
+
+    def drop_keys(self) -> DataIterable:
+        return self.map(lambda x: x[1])
+
+    def to_dict(self):
+        return {d[o]: d[1] for d in self.data()}
+
+    def select(self, key) -> Data:
+        for d in self.data():
+            if d[0] == key:
+                return d[1]
+        raise KeyError("Key {} not found.".format(key))
+
+    def select_all(self, key) -> DataIterable:
+        result = []
+        for d in self.data():
+            if d[0] == key:
+                result.append(d[1])
+        return result
+
+
 class DataNDArray(Data):
-    def __init__(self, data):
+    @classmethod
+    def convert_data_to_ndarray(cls, data):
         import numpy as np
-        super().__init__(np.array(data))
+        if isinstance(data, DataIterable):
+            data = [d.data() for d in data.data()]
+        if isinstance(data, Data):
+            data = data.data()
+        if isinstance(data, (list, tuple)):
+            data = [d.data() if isinstance(d, Data) else d for d in data]
+        return np.array(data)
+
+    def __init__(self, data):
+        super().__init__(self.convert_data_to_ndarray(data))
 
     @classmethod
     def from_(cls, data) -> 'DataNDArray':
