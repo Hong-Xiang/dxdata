@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def rmse(label, target):
+def rmse_(label, target):
   err = target - label
   value = np.sqrt(np.sum(np.square(err)) / label.size)
   # base = np.sqrt(np.sum(np.square(target)) / label.size)
@@ -9,20 +9,20 @@ def rmse(label, target):
   return value
 
 
-def mean_absolute_error(label, target):
+def mean_absolute_error_(label, target):
   err = target - label
   return np.mean(np.abs(err))
 
 
-def bias(label, target):
+def bias_(label, target):
   return np.mean(label - target)
 
 
-def variance(label, target):
+def variance_(label, target):
   return np.std(label - target)
 
 
-def psnr(label, target):
+def psnr_(label, target):
   minv = np.min(label)
   maxv = np.max(label)
   sca = 255.0 / (maxv - minv)
@@ -31,3 +31,32 @@ def psnr(label, target):
   rmv = rmse(ln, tn)
   value = 10 * np.log((255.0**2) / (rmv**2)) / np.log(10)
   return value
+
+
+def _map_batch(func, label, target):
+  nb_images = label.shape[0]
+  result = [func(label[i, ...], target[i, ...]) for i in range(nb_images)]
+  return np.array(result)
+
+
+def _unified_dim_2_and_4(func, label, target):
+  if label.ndim == 2:
+    return func(label, target)
+  elif label.ndim == 4:
+    return map_batch(func, label, target)
+
+
+def psnr(label, target):
+  return _unified_dim_2_and_4(psnr_)
+
+
+def mean_absolute_error(label, target):
+  return _unified_dim_2_and_4(mean_absolute_error_)
+
+
+def variance(label, target):
+  return _unified_dim_2_and_4(variance_)
+
+
+def bias(label, target):
+  return _unified_dim_2_and_4(bias_)
