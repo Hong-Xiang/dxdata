@@ -17,7 +17,7 @@ def gamma_incident_directions(csv_filename) -> pd.DataFrame:
     return pd.DataFrame(data=np.array(inci_dirs.d), columns=['x', 'y', 'z'])
 
 
-def gamma_energy_deposit_distribution(csv_filename):
+def gamma_energy_deposit_samples(csv_filename):
     events = (DataCSV('hits.csv').load()
               .to(RootData)
               .split_by_event())
