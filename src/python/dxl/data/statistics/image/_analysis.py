@@ -52,14 +52,11 @@ def compare_analysis(label,
     raise ValueError(
         "Label and target should have same shape, got label: {}, target: {}.".
         format(label.shape, target.shape))
-  nb_images = label.shape[0]
   results = {}
   for m in metrics:
     name = _metrics_name(m)
     if m in (psnr, rmse):
-      result = []
-      for i in range(nb_images):
-        result.append(m(label, target))
+      result = m(label, target)
     elif m in (ssim, msssim):
       result = m(label, target, max_val=max_val, backend=backend)
     else:
