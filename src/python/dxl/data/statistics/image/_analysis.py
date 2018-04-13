@@ -36,7 +36,12 @@ def rescale(target, label=None, k=None, bias=None, vkeep=None):
   return k * (target + bias)
 
 
-def compare_analysis(label, target, metrics=tuple(), *, max_val=None):
+def compare_analysis(label,
+                     target,
+                     metrics=tuple(),
+                     *,
+                     max_val=None,
+                     backend=None):
   if label.ndim != 4:
     raise ValueError("Label should has shape [N,H,W,C], got {}.".format(
         label.shape))
@@ -56,7 +61,7 @@ def compare_analysis(label, target, metrics=tuple(), *, max_val=None):
       for i in range(nb_images):
         result.append(m(label, target))
     elif m in (ssim, msssim):
-      result = m(label, target, max_val=max_val)
+      result = m(label, target, max_val=max_val, backend=backend)
     else:
       raise ValueError("Unknown metric {}.".format(m))
     results[name] = np.array(result)

@@ -29,8 +29,8 @@ def _msssim_common(img1, img2, max_val, filter_size, filter_sigma, k1, k2,
     mcs.append(_cs)
   result = 1.0
   for mc, w in zip(mcs[:-1], weights[:-1]):
-    result = result * mc ** w
-  result = result * mssim[-1] ** weights[-1]
+    result = result * mc**w
+  result = result * mssim[-1]**weights[-1]
   if isinstance(result, tf.Tensor):
     config = tf.ConfigProto()
     config.gpu_options.allow_growth = True
@@ -71,7 +71,7 @@ def msssim(img1,
            k1=0.01,
            k2=0.03,
            weights=None,
-           backend='cpu'):
+           backend=None):
   """Return the MS-SSIM score between `img1` and `img2`.
   This function implements Multi-Scale Structural Similarity (MS-SSIM) Image
   Quality Assessment according to Zhou Wang's paper, "Multi-scale structural
@@ -99,6 +99,8 @@ def msssim(img1,
     RuntimeError: If input images don't have the same shape or don't have four
       dimensions: [batch_size, height, width, depth].
   """
+  if backend is None:
+    backend = 'cpu'
   if img1.shape != img2.shape:
     raise RuntimeError('Input images must have the same shape (%s vs. %s).',
                        img1.shape, img2.shape)

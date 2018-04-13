@@ -47,10 +47,12 @@ def _unified_dim_2_and_4(func, label, target):
 
 
 def psnr(label, target):
-  return _unified_dim_2_and_4(psnr_)
+  return _unified_dim_2_and_4(psnr_, label, target)
+
 
 def rmse(label, target):
   return _unified_dim_2_and_4(rmse_)
+
 
 def mean_absolute_error(label, target):
   return _unified_dim_2_and_4(mean_absolute_error_)
