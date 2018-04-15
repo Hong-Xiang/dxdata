@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 setup(
     name='dxl-data',
-    version='0.0.7',
+    version='0.0.8',
     description='Data Processing Library.',
     url='https://github.com/Hong-Xiang/dxdata',
     author='Hong Xiang',
@@ -12,5 +12,8 @@ setup(
     package_dir={'': 'src/python'},
     install_requires=['dxl-core', 'dxl-fs', 'pandas==0.20.3'],
     scripts=[],
-    #   namespace_packages = ['dxl'],
+    entry_points="""
+        [console_scripts]
+        dxdata=dxl.data.cli.main:dxdata
+    """,
     zip_safe=False)
