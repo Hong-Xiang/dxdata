@@ -86,7 +86,7 @@ def msssim(img1,
       maximum the and minimum allowed values).
     filter_size: Size of blur kernel to use (will be reduced for small images).
     filter_sigma: Standard deviation for Gaussian blur kernel (will be reduced
-      for small images).
+      for small images)
     k1: Constant used to maintain stability in the SSIM calculation (0.01 in
       the original paper).
     k2: Constant used to maintain stability in the SSIM calculation (0.03 in

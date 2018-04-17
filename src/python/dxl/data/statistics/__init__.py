@@ -1,1 +1,1 @@
-from ._analysis import analysis, analysis_with_config
+from .analysis_utils import analysis, analysis_with_config

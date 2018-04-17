@@ -52,6 +52,8 @@ def compare_analysis(label,
     raise ValueError(
         "Label and target should have same shape, got label: {}, target: {}.".
         format(label.shape, target.shape))
+  if max_val is None:
+    max_val = np.max(label)
   results = {}
   for m in metrics:
     name = _metrics_name(m)
