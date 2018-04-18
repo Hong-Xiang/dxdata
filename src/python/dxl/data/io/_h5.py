@@ -11,14 +11,18 @@ def h5_add_dataset(h5group, dct_of_ndarray, batch_dim=0, tqdm=None):
   else:
     to_iter = tqdm(dct_of_ndarray, leave=False)
   for k in to_iter:
-    if batch_dim == 0:
-      chunk_size = tuple([1] + list(dct_of_ndarray[k].shape[1:]))
+    if isinstance(dct_of_ndarray[k], dict):
+      g = h5group.create_group(k)
+      h5_add_dataset(g, dct_of_ndarray[k], batch_dim, tqdm)
     else:
-      raise ValueError("Batchdim != 0 is not implemented yet.")
-    h5group.create_dataset(
-        k,
-        data=dct_of_ndarray[k],
-        shape=dct_of_ndarray[k].shape,
-        dtype=dct_of_ndarray[k].dtype,
-        chunks=tuple(chunk_size),
-        compression="gzip")
+      if batch_dim == 0:
+        chunk_size = tuple([1] + list(dct_of_ndarray[k].shape[1:]))
+      else:
+        raise ValueError("Batchdim != 0 is not implemented yet.")
+      h5group.create_dataset(
+          k,
+          data=dct_of_ndarray[k],
+          shape=dct_of_ndarray[k].shape,
+          dtype=dct_of_ndarray[k].dtype,
+          chunks=tuple(chunk_size),
+          compression="gzip")
