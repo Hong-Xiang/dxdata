@@ -38,6 +38,14 @@ def save_h5(file_path,
             dataset_path=None,
             *,
             tqdm=None):
+  """
+  Save dict of ndarray to hdf5 file.
+
+  - `file_path` path of hdf5 file in filesystem.
+  - `dataset` dict of np.ndarray to be saved.
+  - `dataset_path` in file group path, if is `None`, `'/'` will be used.
+  - `tqdm` progress bar to be used
+  """
   dataset_path = dataset_path or '/'
   with h5py.File(file_path) as fout:
     g = fout.require_group(dataset_path)
