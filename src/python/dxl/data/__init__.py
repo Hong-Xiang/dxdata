@@ -34,3 +34,5 @@ cloud or through micro service.
 4.  Fast.
 
 """
+
+from .core import *

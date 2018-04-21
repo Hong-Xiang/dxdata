@@ -1,3 +1,8 @@
+from typing import Dict
+import numpy as np
+import h5py
+
+
 def h5_add_dataset(h5group, dct_of_ndarray, batch_dim=0, tqdm=None):
   """
   Add dict of numpy ndarray to hdf5 group/file.
@@ -26,3 +31,14 @@ def h5_add_dataset(h5group, dct_of_ndarray, batch_dim=0, tqdm=None):
           dtype=dct_of_ndarray[k].dtype,
           chunks=tuple(chunk_size),
           compression="gzip")
+
+
+def save_h5(file_path,
+            dataset: Dict[str, np.ndarray],
+            dataset_path=None,
+            *,
+            tqdm=None):
+  dataset_path = dataset_path or '/'
+  with h5py.File(file_path) as fout:
+    g = fout.require_group(dataset_path)
+    h5_add_dataset(g, dataset, tqdm=tqdm)

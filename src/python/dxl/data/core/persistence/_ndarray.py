@@ -25,9 +25,15 @@ class ArrayND:
 
 
 class ArrayNDHDF5(PersistentDataInDataset, ArrayND):
-  def __init__(self, path_file, path_in_dataset):
+  def __init__(self, path_file, path_in_dataset, slices):
     PersistentDataInDataset.__init__(self, path_file, path_in_dataset)
     ArrayND.__init__(self, None)
+    self._slices = slices
 
-  def __enter__(self):
-    pass
+  def data(self):
+    import h5py
+    if self._data is None:
+      with h5py.File(self.path) as fin:
+        slices = [slice(*s) for s in self._slices]
+        self._data = fin[self.path_in_dataset][slices]
+    return self._data
