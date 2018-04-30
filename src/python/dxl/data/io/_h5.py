@@ -30,17 +30,13 @@ def h5_add_dataset(h5group, dct_of_ndarray, batch_dim=0, tqdm=None):
                 chunk_size = tuple(chunk_size)
             else:
                 raise ValueError("Batchdim != 0 is not implemented yet.")
-            print('Not using compression')
             h5group.create_dataset(
                 k,
                 data=dct_of_ndarray[k],
                 shape=dct_of_ndarray[k].shape,
                 dtype=dct_of_ndarray[k].dtype,
                 chunks=tuple(chunk_size),
-            # )
-
-            compression="gzip")
-            # compression="gzip")
+                compression="gzip")
 
 
 def save_h5(file_path,
@@ -60,3 +56,17 @@ def save_h5(file_path,
     with h5py.File(file_path) as fout:
         g = fout.require_group(dataset_path)
         h5_add_dataset(g, dataset, tqdm=tqdm)
+
+
+def load_h5(path_file, path_dataset=None, slices=None):
+    """
+    Load numpy.ndarray from HDF5 file.
+    
+    Args:
+    - `path_file`: `str` or `pathlib.Path`, path of hdf5 file
+    - `path_dataset`: dataset path in file 
+    """
+    if path_dataset is None:
+        path_dataset = '/'
+    with h5py.File(path_file, 'r') as fin:
+        return fin[path_dataset]
