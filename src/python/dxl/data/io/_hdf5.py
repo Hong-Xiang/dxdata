@@ -65,8 +65,12 @@ def load_h5(path_file, path_dataset=None, slices=None):
     Args:
     - `path_file`: `str` or `pathlib.Path`, path of hdf5 file
     - `path_dataset`: dataset path in file 
+    - `slices`: tuple of slice objects or `None`
     """
     if path_dataset is None:
         path_dataset = '/'
     with h5py.File(path_file, 'r') as fin:
-        return fin[path_dataset]
+        if slices is None:
+            return np.array(fin[path_dataset])
+        else:
+            return np.array(fin[path_dataset][slices])
