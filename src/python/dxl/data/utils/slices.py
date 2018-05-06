@@ -4,7 +4,9 @@ def slices_from_ranges(ranges):
 
 def _parse_single_str_slice(s):
     if ':' in s:
-        return slice(*map(int, s.split(':')))
+        splitted = s.split(':')
+        splitted = [None if s == '' else int(s) for s in splitted]
+        return slice(*splitted)
     else:
         return int(s)
 

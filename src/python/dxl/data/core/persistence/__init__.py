@@ -1,1 +1,1 @@
-from ._ndarray import ArrayNDHDF5
+from ._ndarray import *
