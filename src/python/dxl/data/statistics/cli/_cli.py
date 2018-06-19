@@ -3,26 +3,24 @@ import click
 
 class CLI(click.MultiCommand):
     commands = {
-        'statistics': None,
-        'db': None,
+        'image': None
     }
 
     def __init__(self):
-        super(__class__, self).__init__(
-            name='dxdata', help='Data processing CLI.')
+        super(__class__, self).__init__(name='statistics', help='Statistic utilities')
 
     def list_commands(self, ctx):
         return sorted(self.commands.keys())
 
     def get_command(self, ctx, name):
-        # from ..statistics.cli import cli as statistics
-        from ..database.cli import database
+        from ..image.cli import cli as image_cli
         if name in self.commands:
             if self.commands[name] is None:
-                # mapping = {'statistics': statistics}
-                mapping = {'db': database}
+                mapping = {'image': image_cli}
                 self.commands[name] = mapping.get(name)
         return self.commands.get(name)
 
 
-dxdata = CLI()
+cli = CLI()
+
+
