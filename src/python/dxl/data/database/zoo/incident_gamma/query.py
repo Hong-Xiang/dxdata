@@ -28,7 +28,11 @@ def phton_hits_with_first_hit(limit=None):
     return q
 
 
-def all_hits(limit=10):
+def all_photon():
+    return get_or_create_session().query(Photon)
+
+
+def all_hits_group_by_photon(limit=10):
     return get_or_create_session().query(Photon.hits).limit(limit).all()
 
 
@@ -47,7 +51,8 @@ def get_first_hits_for_all_photon():
 
 
 def all_first_hits_of_coincidences(coincidence_type=None):
-    result = get_or_create_session().query(Coincidence, Hit).join(Event).join(Photon)
+    result = get_or_create_session().query(Coincidence,
+                                           Hit).join(Event).join(Photon)
     if coincidence_type is not None:
         result = result.filter(Coincidence.type == coincidence_type)
     result = result.join(Hit).filter(Hit.index == 0)
