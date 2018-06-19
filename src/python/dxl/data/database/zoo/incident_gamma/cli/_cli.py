@@ -15,12 +15,11 @@ class CLI(click.MultiCommand):
         return sorted(self.commands.keys())
 
     def get_command(self, ctx, name):
-        # from ..statistics.cli import cli as statistics
         from .query import query
+        from .gen import generate
         if name in self.commands:
             if self.commands[name] is None:
-                # mapping = {'statistics': statistics}
-                mapping = {'query': query}
+                mapping = {'query': query, 'generate': generate}
                 self.commands[name] = mapping.get(name)
         return self.commands.get(name)
 
