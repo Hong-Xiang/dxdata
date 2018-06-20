@@ -1,4 +1,6 @@
-from dxl.data.zoo.incident_position_estimation import CrystalID1, CrystalID2, CrystalID3, ScannerSpec
+from dxl.data.zoo.incident_position_estimation import (
+    CrystalID1, CrystalID2, CrystalID3, ScannerSpec, Crystal, CrystalFactory)
+from dxl.shape import Vector3
 import pytest
 import json
 
@@ -46,3 +48,10 @@ def test_22122(spec):
     id0 = CrystalID2(cid, bid)
     id1 = id0.to(CrystalID1, spec).to(CrystalID2, spec)
     assert id0 == id1
+
+
+def test_create(spec):
+    f = CrystalFactory(spec)
+    c = f.create(CrystalID2(0, 0))
+    assert (c.entity.origin() - Vector3(
+        [spec.inner_radius, 0.0, -spec.height() / 2])).norm() < 1e-5

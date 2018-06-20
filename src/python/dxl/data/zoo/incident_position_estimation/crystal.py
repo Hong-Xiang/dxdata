@@ -1,7 +1,10 @@
 from dxl.shape import Box
 import numpy as np
 
-__all__ = ['ScannerSpec', 'CrystalID1', 'CrystalID2', 'CrystalID3']
+__all__ = [
+    'ScannerSpec', 'CrystalID1', 'CrystalID2', 'CrystalID3', 'Crystal',
+    'CrystalFactory'
+]
 
 
 class ScannerSpec:
@@ -16,6 +19,9 @@ class ScannerSpec:
     def index_dims(self):
         return (self.nb_blocks, self.nb_detectors_per_ring // self.nb_blocks,
                 self.nb_rings)
+
+    def height(self):
+        return self.nb_rings * self.ring_distance
 
 
 class CrystalID1:
@@ -71,7 +77,6 @@ class CrystalID3:
         self.z = z
 
     def to(self, cls, spec: ScannerSpec):
-
         if cls == CrystalID1:
             return CrystalID1(
                 np.ravel_multi_index([[self.x], [self.y], [self.z]],
@@ -80,6 +85,8 @@ class CrystalID3:
             return CrystalID2(
                 np.ravel_multi_index([[self.y], [self.z]],
                                      spec.index_dims()[:2])[0], self.x)
+        if cls == CrystalID3:
+            return CrystalID3(self.x, self.y, self.z)
         raise TypeError("Can not convert to {}".format(cls))
 
     def __eq__(self, c):
@@ -92,14 +99,27 @@ class CrystalID3:
         return "<CrystalID3(x={}, y={}, z={})>".format(self.x, self.y, self.z)
 
 
+class Crystal:
+    def __init__(self, entity, id):
+        self.entity = entity
+        self.id = id
+
+
 class CrystalFactory:
     def __init__(self, spec: ScannerSpec):
         self.spec = spec
 
     def create(self, crystal_id):
-        pass
+        id3 = crystal_id.to(CrystalID3, self.spec)
+        z = id3.z * self.spec.ring_distance - self.spec.height() / 2
+        theta = 2 * np.pi / self.spec.nb_blocks * id3.x
+        normal = [np.cos(theta), np.sin(theta), 0]
+        center_of_block = np.array(normal[:2]) * self.spec.inner_radius
+        move = id3.y * self.spec.ring_distance / 2
+        x, y = center_of_block + np.array(
+            [move * np.sin(theta), move * np.cos(theta)])
+        crystal_length = self.spec.ring_distance * self.spec.nb_detectors_per_ring / self.spec.nb_blocks
 
-
-class Crystal(Box):
-    def __init__(self, size, center, normal, id):
-        super().__init__(size, center, normal)
+        size = [crystal_length, crystal_length, 20]
+        return Crystal(
+            Box(size, [x, y, z], normal), id3.to(CrystalID2, self.spec))
