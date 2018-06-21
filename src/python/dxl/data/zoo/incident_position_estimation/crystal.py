@@ -1,5 +1,6 @@
 from dxl.shape import Box
 import numpy as np
+import json
 
 __all__ = [
     'ScannerSpec', 'CrystalID1', 'CrystalID2', 'CrystalID3', 'Crystal',
@@ -22,6 +23,11 @@ class ScannerSpec:
 
     def height(self):
         return self.nb_rings * self.ring_distance
+
+    @classmethod
+    def from_json_file(cls, path):
+        with open(path, 'r') as fin:
+            return ScannerSpec(**json.load(fin))
 
 
 class CrystalID1:
@@ -84,7 +90,7 @@ class CrystalID3:
         if cls == CrystalID2:
             return CrystalID2(
                 np.ravel_multi_index([[self.y], [self.z]],
-                                     spec.index_dims()[:2])[0], self.x)
+                                     spec.index_dims()[1:])[0], self.x)
         if cls == CrystalID3:
             return CrystalID3(self.x, self.y, self.z)
         raise TypeError("Can not convert to {}".format(cls))
@@ -114,8 +120,12 @@ class CrystalFactory:
         z = id3.z * self.spec.ring_distance - self.spec.height() / 2
         theta = 2 * np.pi / self.spec.nb_blocks * id3.x
         normal = [np.cos(theta), np.sin(theta), 0]
-        center_of_block = np.array(normal[:2]) * self.spec.inner_radius
-        move = id3.y * self.spec.ring_distance / 2
+        center_of_block = np.array([np.cos(theta),
+                                    np.sin(theta)]) * self.spec.inner_radius
+        print(center_of_block)
+        move = id3.y * self.spec.ring_distance + self.spec.ring_distance * self.spec.nb_detectors_per_ring / self.spec.nb_blocks
+        print(id3)
+        print(move)
         x, y = center_of_block + np.array(
             [move * np.sin(theta), move * np.cos(theta)])
         crystal_length = self.spec.ring_distance * self.spec.nb_detectors_per_ring / self.spec.nb_blocks

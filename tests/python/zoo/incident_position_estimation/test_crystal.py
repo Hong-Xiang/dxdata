@@ -38,10 +38,19 @@ def test_223_2(spec):
     assert id1 == CrystalID3(4, 1, 0)
 
 
+def test_223_3(spec):
+    id0 = CrystalID2(93, 4)
+    id1 = id0.to(CrystalID3, spec)
+    assert id1 == CrystalID3(4, 9, 3)
+
 def test_322(spec):
     id0 = CrystalID3(4, 1, 0)
     assert id0.to(CrystalID2, spec) == CrystalID2(10, 4)
 
+def test_322_2(spec):
+    id0 = CrystalID3(4, 9, 3)
+    id1 = id0.to(CrystalID2, spec)
+    assert id1 == CrystalID2(93, 4)
 
 def test_22122(spec):
     cid, bid = 10, 4
@@ -54,4 +63,4 @@ def test_create(spec):
     f = CrystalFactory(spec)
     c = f.create(CrystalID2(0, 0))
     assert (c.entity.origin() - Vector3(
-        [spec.inner_radius, 0.0, -spec.height() / 2])).norm() < 1e-5
+        [spec.inner_radius, 33.4, -spec.height() / 2])).norm() < 1e-5
