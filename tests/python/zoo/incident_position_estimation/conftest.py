@@ -1,5 +1,7 @@
 import pytest
 from pathlib import Path
+from dxl.data.zoo.incident_position_estimation.crystal import ScannerSpec
+import json
 
 
 @pytest.fixture(scope='module')
@@ -21,3 +23,10 @@ def spec_of_block8_data():
         'hits_csv': root / 'hitsM.csv',
         'coincidences_csv': root / 'true_scatter_randomM.csv'
     }
+
+
+@pytest.fixture(scope='module')
+def scanner_spec(path_resource):
+    with open(path_resource / 'PETSystems' / 'MindTracker' / 'block8' /
+              'spec.json', 'r') as fin:
+        return ScannerSpec(**json.load(fin))

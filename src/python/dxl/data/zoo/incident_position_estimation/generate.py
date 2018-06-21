@@ -1,20 +1,23 @@
 """
 Convert csv data to database.
 """
-import pandas
-from dxl.data.database import get_or_create_session, create_all
-from .orm import Experiment, Crystal, Coincidence, Event, Photon, Hit
-from tqdm import tqdm
-import numpy as np
-import time
 import json
+import time
+from functools import wraps
 
 import click
-from dxl.core.logger import Logger
-from dxl.core.logger.utils import set_logging_info_level_with_default_format
+import numpy as np
+import pandas
+from tqdm import tqdm
 
 from dxl.core.debug import enter_debug
-from functools import wraps
+from dxl.core.logger import Logger
+from dxl.core.logger.utils import set_logging_info_level_with_default_format
+from dxl.data.database import create_all, get_or_create_session
+
+from .orm import Coincidence, Crystal, Event, Experiment, Hit, Photon
+from .crystal import ScannerSpec, CrystalFactory, CrystalID2
+
 enter_debug()
 
 logger = Logger('incident_estimation')
@@ -22,22 +25,25 @@ set_logging_info_level_with_default_format()
 
 NB_CHUNK = 1000
 
+
 class auto_flush:
     def __init__(self, nb_chunk=None):
         if nb_chunk is None:
             nb_chunk = NB_CHUNK
         self.nb_chunk = nb_chunk
         self.nb_called = 0
-    
+
     def __call__(self, func):
         @wraps(func)
         def caller(session, *args, **kwargs):
-            result = func(session, *args, **kwargs) 
+            result = func(session, *args, **kwargs)
             self.nb_called += 1
             if self.nb_called % self.nb_chunk == 0:
                 session.flush()
             return result
+
         return caller
+
 
 class DataSpec:
     def __init__(self, hits_csv, coincidence_csv, target_path):
@@ -54,20 +60,37 @@ def load_data(s: DataSpec):
 
 class Crystals:
     def __init__(self, spec):
-        self.spec = spec
+        self.factory = CrystalFactory(spec)
+        self.data = {}
 
-    def make(self, crystal_id, block_id):
-        pass
+    def make(self, session, experiment, crystal_id, block_id):
+        cid2 = CrystalID2(crystal_id, block_id)
+        c_obj = self.factory.create(cid2)
+        origin = c_obj.entity.origin()
+        shape = c_obj.entity.shape()
+        normal = c_obj.entity.normal()
+        c_db = Crystal(
+            crystal_id=cid2.crystal_id,
+            block_id=cid2.block_id,
+            experiment=experiment,
+            x=origin.x(),
+            y=origin.y(),
+            z=origin.z(),
+            width=shape.x(),
+            height=shape.y(),
+            depth=shape.z(),
+            normal_x=normal.x(),
+            normal_y=normal.y(),
+            normal_z=normal.z())
+        session.add(c_db)
+        return c_db
+
+    def make_and_store(self, session, experiment, crystal_id, block_id):
+        self.data[(crystal_id, block_id)] = self.make(session, experiment,
+                                                      crystal_id, block_id)
 
     def get(self, crystal_id, block_id):
-        pass
-
-
-class Processing:
-    experiment = None
-    session = None
-    events = {}
-    photons = {}
+        return self.data.get((crystal_id, block_id))
 
 
 class Experiments:
@@ -163,6 +186,7 @@ class Hits:
             if i % NB_CHUNK == 0:
                 flush()
 
+
 @logger.before.info('committing...')
 @logger.after.info('commit done.')
 def commit():
@@ -191,6 +215,7 @@ def make_coincidences(conincidence_data):
         if i % NB_CHUNK == 0:
             flush()
 
+
 class DatabaseGenerator:
     def __init__(self, scanner_json, hits_csv, coincidence_csv, target_path):
         self.scanner_json = scanner_json
@@ -212,21 +237,21 @@ class DatabaseGenerator:
         hits_data = pandas.read_csv(s.hits_csv)
         coincidences_data = pandas.read_csv(s.coincidence_csv)
         return scanner_spec, hits_data, coincidences_data
-        
 
     def generate(self):
         self.session = self.make_session()
-        self.experiments.experiment = self.experiments.make([self.scanner_json, self.hits_csv, self.conincidence_csv], self.session)
+        self.experiments.experiment = self.experiments.make(
+            [self.scanner_json, self.hits_csv, self.conincidence_csv],
+            self.session)
         scanner_spec, hits_data, coincidence_data = self.load_data()
         self.crystals.process(scanner_spec)
         self.hits.process(hits_data)
         self.coincidences.process(coincidence_data)
 
-
-
     def make_session(self):
         create_all(self.target_path)
         return get_or_create_session(self.target_path)
+
 
 @logger.before.info(
     'Generating database from:\nCoincidence csv: {coincidence_csv},\nHits csv: {hits_csv},\nTarget: {target}.\n'
