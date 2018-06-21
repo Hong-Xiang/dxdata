@@ -9,13 +9,14 @@ __all__ = [
 
 
 class ScannerSpec:
-    def __init__(self, inner_radius, nb_rings, nb_detectors_per_ring,
-                 nb_blocks, ring_distance):
-        self.inner_radius = inner_radius
+    def __init__(self, inner_diameter, nb_rings, nb_detectors_per_ring,
+                 nb_blocks, ring_distance, crystal_length):
+        self.inner_diameter = inner_diameter
         self.nb_rings = nb_rings
         self.nb_blocks = nb_blocks
         self.nb_detectors_per_ring = nb_detectors_per_ring
         self.ring_distance = ring_distance
+        self.crystal_length = crystal_length
 
     def index_dims(self):
         return (self.nb_blocks, self.nb_detectors_per_ring // self.nb_blocks,
@@ -58,7 +59,8 @@ class CrystalID2:
 
     def to(self, cls, spec):
         if cls == CrystalID3:
-            y, z = np.unravel_index([self.crystal_id], spec.index_dims()[1:])
+            y, z = np.unravel_index(
+                [self.crystal_id], spec.index_dims()[1:], order='F')
             return CrystalID3(self.block_id, y[0], z[0])
         else:
             return self.to(CrystalID3, spec).to(cls, spec)
@@ -89,8 +91,9 @@ class CrystalID3:
                                      spec.index_dims())[0])
         if cls == CrystalID2:
             return CrystalID2(
-                np.ravel_multi_index([[self.y], [self.z]],
-                                     spec.index_dims()[1:])[0], self.x)
+                np.ravel_multi_index(
+                    [[self.y], [self.z]], spec.index_dims()[1:], order='F')[0],
+                self.x)
         if cls == CrystalID3:
             return CrystalID3(self.x, self.y, self.z)
         raise TypeError("Can not convert to {}".format(cls))
@@ -116,20 +119,23 @@ class CrystalFactory:
         self.spec = spec
 
     def create(self, crystal_id):
+        crystal_size = self.spec.ring_distance
         id3 = crystal_id.to(CrystalID3, self.spec)
-        z = id3.z * self.spec.ring_distance - self.spec.height() / 2
+        z = id3.z * crystal_size - self.spec.height() / 2
+        z = z + crystal_size / 2
         theta = 2 * np.pi / self.spec.nb_blocks * id3.x
         normal = [np.cos(theta), np.sin(theta), 0]
-        center_of_block = np.array([np.cos(theta),
-                                    np.sin(theta)]) * self.spec.inner_radius
-        print(center_of_block)
-        move = id3.y * self.spec.ring_distance + self.spec.ring_distance * self.spec.nb_detectors_per_ring / self.spec.nb_blocks
-        print(id3)
-        print(move)
+        center_of_block = np.array(
+            [np.cos(theta), np.sin(theta)]) * (
+                self.spec.inner_diameter / 2 + self.spec.crystal_length / 2)
+        move = crystal_size * (
+            id3.y - self.spec.nb_detectors_per_ring / self.spec.nb_blocks / 2 +
+            0.5)
         x, y = center_of_block + np.array(
-            [move * np.sin(theta), move * np.cos(theta)])
-        crystal_length = self.spec.ring_distance * self.spec.nb_detectors_per_ring / self.spec.nb_blocks
+            [-move * np.sin(theta), move * np.cos(theta)])
 
-        size = [crystal_length, crystal_length, 20]
+        crystal_length = self.spec.ring_distance
+
+        size = [crystal_length, crystal_length, self.spec.crystal_length]
         return Crystal(
             Box(size, [x, y, z], normal), id3.to(CrystalID2, self.spec))
