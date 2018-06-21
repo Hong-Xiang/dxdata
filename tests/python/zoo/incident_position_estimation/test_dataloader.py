@@ -1,4 +1,4 @@
-from dxl.data.database.zoo.incident_gamma import PhotonDataColumns
+from dxl.data.zoo.incident_position_estimation import PhotonDataColumns
 from pathlib import Path
 import pytest
 
