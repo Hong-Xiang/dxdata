@@ -43,7 +43,8 @@ class PhotonDataColumns(DataColumns):
                     center = [[h.crystal.x, h.crystal.y, h.crystal.z]
                               for h in p.hits]
                     hits = [c + h[3:] for c, h in zip(center, hits)]
-                random.shuffle(hits)
+                if self.is_shuffle:
+                    random.shuffle(hits)
                 first_hit = None
                 for i, h in enumerate(hits):
                     if h[4] == 0:
