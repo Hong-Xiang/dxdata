@@ -29,6 +29,14 @@ class PhotonDataColumns(DataColumns):
         return get_or_create_session(path)
 
     @property
+    def types(self):
+        return {'hits': np.float32, 'first_hit': np.int32}
+
+    @property
+    def shapes(self):
+        return {'hits': [None, 4], 'first_hit': [None]}
+
+    @property
     def columns(self):
         return tuple(['hits', 'first_hit'])
 

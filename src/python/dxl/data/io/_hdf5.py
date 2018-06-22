@@ -28,6 +28,8 @@ def h5_add_dataset(h5group, dct_of_ndarray, batch_dim=0, tqdm=None):
                 if nb_chunks > 10000:
                     chunk_size[0] = dct_of_ndarray[k].shape[0] // 10000
                 chunk_size = tuple(chunk_size)
+                if dct_of_ndarray[k].shape[0] == 0:
+                    chunk_size = None
             else:
                 raise ValueError("Batchdim != 0 is not implemented yet.")
             h5group.create_dataset(
@@ -35,7 +37,7 @@ def h5_add_dataset(h5group, dct_of_ndarray, batch_dim=0, tqdm=None):
                 data=dct_of_ndarray[k],
                 shape=dct_of_ndarray[k].shape,
                 dtype=dct_of_ndarray[k].dtype,
-                chunks=tuple(chunk_size),
+                chunks=chunk_size,
                 compression="gzip")
 
 
