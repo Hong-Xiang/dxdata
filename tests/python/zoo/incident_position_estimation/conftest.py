@@ -26,7 +26,6 @@ def spec_of_block8_data():
 
 
 @pytest.fixture(scope='module')
-def scanner_spec(path_resource):
-    with open(path_resource / 'PETSystems' / 'MindTracker' / 'block8' /
-              'spec.json', 'r') as fin:
+def scanner_spec(spec_of_block8_data):
+    with open(spec_of_block8_data['scanner_json'], 'r') as fin:
         return ScannerSpec(**json.load(fin))

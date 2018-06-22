@@ -25,6 +25,14 @@ class ScannerSpec:
     def height(self):
         return self.nb_rings * self.ring_distance
 
+    @property
+    def nb_detectors_per_block(self):
+        return self.nb_detectors_per_ring // self.nb_blocks * self.nb_rings
+    
+    @property
+    def nb_detectors(self):
+        return self.nb_detectors_per_ring * self.nb_rings
+
     @classmethod
     def from_json_file(cls, path):
         with open(path, 'r') as fin:
