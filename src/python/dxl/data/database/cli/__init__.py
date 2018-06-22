@@ -2,7 +2,9 @@ import click
 
 
 class CLI(click.MultiCommand):
-    commands = {'statistics': None, 'db': None, 'zoo': None}
+    commands = {
+        'incident': None,
+    }
 
     def __init__(self):
         super(__class__, self).__init__(
@@ -12,13 +14,14 @@ class CLI(click.MultiCommand):
         return sorted(self.commands.keys())
 
     def get_command(self, ctx, name):
-        from ..database.cli import database
-        from dxl.data.zoo.cli import zoo
+        from ..zoo.incident_gamma.cli import incident
         if name in self.commands:
             if self.commands[name] is None:
-                mapping = {'db': database, 'zoo': zoo}
+                mapping = {
+                    'incident': incident
+                }
                 self.commands[name] = mapping.get(name)
         return self.commands.get(name)
 
 
-dxdata = CLI()
+database = CLI()
