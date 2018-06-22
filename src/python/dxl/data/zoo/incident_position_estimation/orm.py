@@ -41,6 +41,7 @@ class Event(Base):
         return "<Event(id={}, index={}, expr={}, photons={})>".format(
             self.id, self.index, self.experiment.hash[:4], self.photons)
 
+
 class Photon(Base):
     __tablename__ = 'photons'
     id = Column(Integer, primary_key=True)
@@ -72,6 +73,11 @@ class Crystal(Base):
     normal_y = Column(Float)
     normal_z = Column(Float)
 
+    def __repr__(self):
+        return "<Crystal(center=({}, {}, {}), shape=({}, {}, {}), normal=({}, {}, {}))>".format(
+            self.x, self.y, self.z, self.width, self.height, self.depth,
+            self.normal_x, self.normal_y, self.normal_z)
+
 
 class Hit(Base):
     __tablename__ = 'hits'
@@ -80,6 +86,8 @@ class Hit(Base):
     experiment_id = Column(Integer, ForeignKey('experiments.id'))
     experiment = relationship(Experiment)
     photon_id = Column(Integer, ForeignKey('photons.id'))
+    crystal_id = Column(Integer, ForeignKey('crystals.id'))
+    crystal = relationship(Crystal)
 
     x = Column(Float)
     y = Column(Float)

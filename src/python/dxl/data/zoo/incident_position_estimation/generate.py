@@ -169,20 +169,22 @@ class Events:
 
 
 class Hits:
-    def make(self, session, row, experiment):
+    def make(self, session, row, experiment, crystal):
         hit = Hit(
             x=row['posX'],
             y=row['posY'],
             z=row['posZ'],
             energy=row['edep'],
             time=row['time'],
-            experiment=experiment)
+            experiment=experiment,
+            crystal=crystal)
         session.add(hit)
         return hit
 
     @auto_flush()
-    def process_row(self, session, row, events, photons, experiment):
-        hit = self.make(session, row, experiment)
+    def process_row(self, session, row, events, photons, crystals, experiment):
+        cid, bid = int(row['crystalID']), int(row['blockID'])
+        hit = self.make(session, row, experiment, crystals.get(cid, bid))
         eid, pid = int(row['eventID']), int(row['photonID'])
         e = events.get_or_create(session, eid, photons, experiment)
         p = photons.get_or_create(session, eid, pid, events, experiment)
@@ -192,10 +194,11 @@ class Hits:
 
     @logger.before.info('Processing rows...')
     @logger.after.info('Process row done.')
-    def process_all(self, session, hits_data, experiment, events, photons):
+    def process_all(self, session, hits_data, experiment, events, photons,
+                    crystals):
         for i in tqdm(range(hits_data.shape[0]), ascii=True):
             self.process_row(session, hits_data.iloc[i], events, photons,
-                             experiment)
+                             crystals, experiment)
         session.flush()
 
 
@@ -268,7 +271,7 @@ class DatabaseGenerator:
         self.crystals.set_spec(scanner_spec)
         self.crystals.process_all(session, scanner_spec, experiment)
         self.hits.process_all(session, hits_data, experiment, self.events,
-                              self.photons)
+                              self.photons, self.crystals)
         self.coincidences.process_all(session, coincidence_data, experiment,
                                       self.events)
         self.commit()
