@@ -21,3 +21,8 @@ def test_load_multiple(default_db):
         assert s['hits'].shape[1] == 4
         first_hits.add(s['first_hit'])
     assert len(first_hits) > 1
+
+
+def test_load_normal(default_db):
+    for i in range(10):
+        print(next(default_db))

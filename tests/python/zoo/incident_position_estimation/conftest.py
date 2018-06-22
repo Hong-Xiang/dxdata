@@ -29,3 +29,5 @@ def spec_of_block8_data():
 def scanner_spec(spec_of_block8_data):
     with open(spec_of_block8_data['scanner_json'], 'r') as fin:
         return ScannerSpec(**json.load(fin))
+
+

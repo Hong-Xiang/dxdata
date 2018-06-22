@@ -15,13 +15,15 @@ def query(ctx, path):
 @click.argument('cls')
 @click.pass_context
 def nb(ctx, cls):
-    from ..query import nb_photon, nb_hits, nb_crystal
+    from ..query import nb_photon, nb_hits, nb_crystal, nb_experiments
     func_map = {
         'hit': nb_hits,
         'hits': nb_hits,
         'photon': nb_photon,
         'crystal': nb_crystal,
         'crystals': nb_crystal,
+        'experiment': nb_experiments,
+        'experiments': nb_experiments
     }
     path = ctx.obj['PATH']
     create_all(path)

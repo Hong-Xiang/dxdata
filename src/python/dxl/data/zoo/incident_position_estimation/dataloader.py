@@ -10,6 +10,13 @@ dataset_path = '../../../data/gamma.db'
 
 
 class PhotonDataColumns(DataColumns):
+    def __init__(self, path, is_shuffle=True, is_crystal_center=True):
+        super().__init__({
+            'path': path,
+            'is_shuffle': is_shuffle,
+            'is_crystal_center': is_crystal_center
+        })
+
     def _process(self, data):
         if isinstance(data, str):
             path = data
@@ -17,8 +24,9 @@ class PhotonDataColumns(DataColumns):
         else:
             path = data['path']
             is_shuffle = data['is_shuffle']
-        self.data = get_or_create_session(path)
         self.is_shuffle = is_shuffle
+        self.is_crystal_center = data['is_crystal_center']
+        return get_or_create_session(path)
 
     @property
     def columns(self):
@@ -29,8 +37,12 @@ class PhotonDataColumns(DataColumns):
 
     def _make_iterator(self):
         def it():
-            for p in all_photon():
+            for p in all_photon(self.data):
                 hits = [h.to_list() for h in p.hits]
+                if self.is_crystal_center:
+                    center = [[h.crystal.x, h.crystal.y, h.crystal.z]
+                              for h in p.hits]
+                    hits = [c + h[3:] for c, h in zip(center, hits)]
                 random.shuffle(hits)
                 first_hit = None
                 for i, h in enumerate(hits):

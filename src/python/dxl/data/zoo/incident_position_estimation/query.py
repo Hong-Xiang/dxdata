@@ -1,5 +1,5 @@
 from dxl.data.database.engine import get_or_create_session
-from .orm import Coincidence, Event, Photon, Hit, Crystal
+from .orm import Coincidence, Event, Photon, Hit, Crystal, Experiment
 from tqdm import tqdm
 import numpy as np
 import click
@@ -22,6 +22,12 @@ def nb_photon():
 
 def nb_crystal():
     return get_or_create_session().query(Crystal).count()
+
+
+def nb_experiments(session=None):
+    if session is None:
+        session = get_or_create_session()
+    return session.query(Experiment).distinct().count()
 
 
 def phton_hits_with_first_hit(limit=None):
@@ -51,8 +57,8 @@ def hit_crystal_tuple():
         Hit, Crystal).filter(Hit.crystal_id == Crystal.id)
 
 
-def all_photon():
-    return get_or_create_session().query(Photon)
+def all_photon(session):
+    return session.query(Photon)
 
 
 def all_hits_group_by_photon(limit=10):

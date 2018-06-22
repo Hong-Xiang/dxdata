@@ -76,6 +76,7 @@ def test_dataspec(session_spy, spec_of_block8_data, tmpdir):
     s = DataSpec(target_path=target, **spec_of_block8_data)
 
 
+@pytest.mark.slow
 def test_generator(session_spy, spec_of_block8_data, tmpdir):
     target = tmpdir.mkdir("dxl.data.zoo.incident_position_esitimation").join(
         "gamma.db")
