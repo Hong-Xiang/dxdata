@@ -22,7 +22,7 @@ import hashlib
 
 enter_debug()
 
-logger = Logger('incident_estimation')
+logger = Logger('incident_position_estimation')
 set_logging_info_level_with_default_format()
 
 NB_CHUNK = 1000
@@ -196,6 +196,7 @@ class Hits:
         for i in tqdm(range(hits_data.shape[0]), ascii=True):
             self.process_row(session, hits_data.iloc[i], events, photons,
                              experiment)
+        session.flush()
 
 
 class Coincidences:
@@ -216,6 +217,7 @@ class Coincidences:
     def process_all(self, session, conincidence_data, experiment, events):
         for i in tqdm(range(conincidence_data.shape[0]), ascii=True):
             self.make(session, conincidence_data.iloc[i], events, experiment)
+        session.flush()
 
 
 class DataSpec:
@@ -269,6 +271,7 @@ class DatabaseGenerator:
                               self.photons)
         self.coincidences.process_all(session, coincidence_data, experiment,
                                       self.events)
+        self.commit()
 
     def make_session(self):
         create_all(self.spec.target_path)
