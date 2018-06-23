@@ -1,33 +1,32 @@
-from dxl.data.core.function import *
+from dxl.data.core.function.func import *
+import pytest
 
 
-class TestMultiDispatchByArgs:
-    def test_len_of_key_equals_one(self):
-        class MultiPatchAdd(MultiDispatchByArgs):
-            def __init__(self):
-                super().__init__({int: self._int, str: self._str})
+@pytest.fixture
+def multi_impls():
+    return {int: lambda x: x + 1, str: lambda s: s + '1'}
 
-            def _int(self, x):
-                return x + 1
 
-            def _str(self, x):
-                return x + '1'
+def test_multi_methods_function(multi_impls):
+    f = MultiMethodsFunction(multi_impls, type)
+    assert f(1) == 2
+    assert f('1') == '11'
 
-        foo = MultiPatchAdd()
-        assert foo(1) == 2
-        assert foo('1') == '11'
 
-    def test_auto_search_impl(self):
-        class MultiPatchAdd(MultiDispatchByArgs):
-            def __init__(self):
-                super().__init__(len_of_key=1)
+def test_head_arg():
+    assert head_arg(0) == 0
 
-            def _int(self, x):
-                return x + 1
 
-            def _str(self, x):
-                return x + '1'
+def test_head_arg():
+    assert head_arg(0, 1) == 0
 
-        foo = MultiPatchAdd()
-        assert foo(1) == 2
-        assert foo('1') == '11'
+
+def test_multi_methods_by_type_of_first_arg(multi_impls):
+    def foo(*args, **kwags):
+        return args[0] + 1
+
+    multi_impls.update({int: foo})
+    f = MultiMethodsByTypeOfFirstArg(multi_impls)
+    assert f(1) == 2
+    assert f(1, 2) == 2
+    assert f('1') == '11'

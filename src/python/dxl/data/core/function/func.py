@@ -1,6 +1,10 @@
 from .core import Function, function
 
-__all__ = ['head_arg', 'HeadNArgs', 'MultiMethodsFunction', 'MultiMethodsByTypeOfFirstArg', 'MultiMethodsByFirstArg']
+__all__ = [
+    'head_arg', 'HeadNArgs', 'MultiMethodsFunction',
+    'MultiMethodsByTypeOfFirstArg', 'MultiMethodsByFirstArg'
+]
+
 
 @function
 def head_arg(*args, **kwargs):
@@ -30,9 +34,9 @@ class MultiMethodsFunction(Function):
 
 class MultiMethodsByTypeOfFirstArg(MultiMethodsFunction):
     def __init__(self, impls):
-        super().__init__(self, impls, head_arg >> type)
+        super().__init__(impls, head_arg >> type)
 
 
 class MultiMethodsByFirstArg(MultiMethodsFunction):
     def __init__(self, impls):
-        super().__init__(self, impls, head_arg)
+        super().__init__(impls, head_arg)
