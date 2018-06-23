@@ -80,13 +80,22 @@ class MultiDispatchByArgs(Function):
         self.implements = implements
         self.len_of_key = len_of_key
 
-    def __call__(self, *args, **kwargs):
-        key = tuple(map(lambda x: x.__class__, args[:self.len_of_key]))
+    def _func_key(self, *args, **kwargs):
+        return tuple(map(lambda x: x.__class__, args[:self.len_of_key]))
+
+    def _func_name(self, *args, **kwargs):
+        return ''.join(['_{}'.format(c.__name__) for c in self._func_key(*args, **kwargs)])
+
+    def _func_in_implements(self, *args, **kwargs):
+        key = self._func_key(*args, **kwargs)
         if len(key) == 1:
             key = key[0]
-        func = self.implements.get(key)
+        return self.implements.get(key)
+
+    def __call__(self, *args, **kwargs):
+        func = self._func_in_implements(*args, **kwargs)
         if func is None:
-            func = getattr(self, sum('_{}'.format(c.__name__) for c in key))
+            func = getattr(self, self._func_name(*args, **kwargs))
         if func is None:
             raise NotImplementedError(
                 "No implementation of {} for  {}.".format(self.__class__, key))

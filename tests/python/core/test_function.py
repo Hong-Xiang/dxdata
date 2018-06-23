@@ -16,5 +16,18 @@ class TestMultiDispatchByArgs:
         foo = MultiPatchAdd()
         assert foo(1) == 2
         assert foo('1') == '11'
-    
-    def test_
+
+    def test_auto_search_impl(self):
+        class MultiPatchAdd(MultiDispatchByArgs):
+            def __init__(self):
+                super().__init__(len_of_key=1)
+
+            def _int(self, x):
+                return x + 1
+
+            def _str(self, x):
+                return x + '1'
+
+        foo = MultiPatchAdd()
+        assert foo(1) == 2
+        assert foo('1') == '11'
