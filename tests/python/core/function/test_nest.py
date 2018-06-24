@@ -26,3 +26,18 @@ def test_take_iter_multiple_times(gen5):
     r = Take(2)(gen5)
     r = Take(2)(gen5)
     assert r == [2, 3]
+
+
+def test_nest_map_of_on_list():
+    f = NestMapOf(lambda x: x + 1)
+    assert f([1, 2, 3]) == [2, 3, 4]
+
+
+def test_nest_map_of_on_tuple():
+    f = NestMapOf(lambda x: x + 1)
+    assert f((1, 2, 3)) == (2, 3, 4)
+
+
+def test_nest_map_of_on_dict():
+    f = NestMapOf(lambda x: x + 1)
+    assert f({'x': 1, 'y': 2}) == {'x': 2, 'y': 3}

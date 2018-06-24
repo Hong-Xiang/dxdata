@@ -1,7 +1,10 @@
 from functools import wraps
 from dxl.data import utils
 
-__all__ = ['Function', 'WrappedFunction', 'function', 'ChainedFunction', 'identity']
+__all__ = [
+    'Function', 'WrappedFunction', 'function', 'ChainedFunction', 'identity',
+    'OnIterator'
+]
 
 
 class Function:
@@ -34,6 +37,19 @@ class ChainedFunction(Function):
 
 
 identity = function(lambda _: _)
+
+
+class OnIterator(Function):
+    def __init__(self, f):
+        self.f = f
+
+    def __call__(self, it, *args, **kwargs):
+        def result():
+            for x in it:
+                yield self.f(x, *args, **kwargs)
+
+        return result()
+
 
 # class MultiDispatchByFirstArg(MultiDispatchByArgs):
 #     def __init__(self, implements):
