@@ -24,11 +24,11 @@ dataset_path = '../../../data/gamma.db'
 
 class TensorTypes:
     @classmethod
-    def dtypes(self):
+    def dtypes(cls):
         raise NotImplementedError
 
     @classmethod
-    def shapes(self):
+    def shapes(cls):
         raise NotImplementedError
 
 
@@ -158,8 +158,8 @@ class ORMTo(Function):
 
 
 class ShuffledHitsColumns(Columns):
-    def __init__(self, source_columns: Columns, processing):
-        super().__init__(ShuffledHitsWithIndex)
+    def __init__(self, source_columns: Columns, dataclass, processing):
+        super().__init__(dataclass)
         self.source_columns = source_columns
         self.processing = processing
 
@@ -178,8 +178,9 @@ def padded_hits_columns(path, size, dataclass, shuffle, is_with_padded_size):
                >> MapByPosition(0, To(np.array))
                >> MapByPosition(0, Padding(size, is_with_padded_size=is_with_padded_size)))
     if is_with_padded_size:
-        process = (process >> MapWithUnpackArgsKwargs(append) >> Swap(1, 2)
-                   >> MapWithUnpackArgsKwargs(To(ShuffledHitsWithIndexAndPaddedSize)))
+        process = (process >> MapWithUnpackArgsKwargs(append) >> Swap(1, 2))
+        dataclass = ShuffledHitsWithIndexAndPaddedSize
     else:
-        process = process >> MapWithUnpackArgsKwargs(To(ShuffledHitsWithIndex))
-    return ShuffledHitsColumns(PhotonColumns(path), OnIterator(process))
+        dataclass = ShuffledHitsWithIndex
+    process = process >> MapWithUnpackArgsKwargs(To(dataclass))
+    return ShuffledHitsColumns(PhotonColumns(path), dataclass, OnIterator(process))

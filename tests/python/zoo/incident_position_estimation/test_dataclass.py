@@ -91,7 +91,7 @@ def hit_columns(photon_columns):
                     >> NestMapOf(ORMTo(Hit))
                     >> just_add_index
                     >> To(ShuffledHitsWithIndex))
-    return ShuffledHitsColumns(photon_columns, OnIterator(orms_to_hits))
+    return ShuffledHitsColumns(photon_columns, ShuffledHitsWithIndex, OnIterator(orms_to_hits))
 
 
 def test_shuffled_hits_columns_columns(hit_columns):
@@ -116,6 +116,7 @@ def test_padded_hits_columns_0(path_of_db):
     assert h.first_hit_index == 0
     assert h.padded_size == 9
     assert h.hits.shape == (10, 4)
+    assert len(columns.shapes) == 3
 
 
 def test_padded_hits_columns_1(path_of_db):
@@ -124,3 +125,4 @@ def test_padded_hits_columns_1(path_of_db):
     assert isinstance(h, ShuffledHitsWithIndex)
     assert h.first_hit_index == 0
     assert h.hits.shape == (10, 4)
+    assert len(columns.shapes) == 2
