@@ -127,7 +127,7 @@ dtype = _DType()
 
 
 class Padding(Function):
-    def __init__(self, size, axis=0, value=None, is_with_padded_size=False):
+    def __init__(self, size, axis=0, value=0.0, is_with_padded_size=False):
         super().__init__()
         self.size = size
         self.axis = axis

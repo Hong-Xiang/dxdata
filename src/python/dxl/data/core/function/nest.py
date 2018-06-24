@@ -3,7 +3,8 @@ from .func import MultiMethodsByTypeOfFirstArg
 from typing import NamedTuple
 from collections import namedtuple
 
-__all__ = ['NestMapOf', 'Take', 'head', 'MapByNameOf']
+__all__ = ['NestMapOf', 'Take', 'head',
+           'MapByNameOf', 'MapByPosition', 'append', 'Swap']
 
 
 class NestMapOf(MultiMethodsByTypeOfFirstArg):
@@ -70,3 +71,31 @@ class MapByNameOf(MultiMethodsByTypeOfFirstArg):
                   else getattr(t, k)
                   for k in t._fields]
         return type(t)(*result)
+
+
+class MapByPosition(Function):
+    def __init__(self, position, f):
+        self.position = position
+        self.f = f
+
+    def __call__(self, x):
+        return [self.f(_) if i == self.position else _ for i, _ in enumerate(x)]
+
+
+@function
+def append(l, x):
+    return list(l) + [x]
+
+
+class Swap(Function):
+    def __init__(self, src, tar):
+        self.src = src
+        self.tar = tar
+
+    def __call__(self, x):
+        if self.src == self.tar:
+            return x
+        i_min, i_max = min(self.src, self.tar), max(self.src, self.tar)
+        return (x[:i_min] + [x[i_max]]
+                + x[i_min + 1: i_max]
+                + [x[i_min]] + x[i_max + 1:])

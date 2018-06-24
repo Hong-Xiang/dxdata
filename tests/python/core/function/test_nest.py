@@ -71,3 +71,7 @@ def test_select_map_of_on_named_tuple():
     C = namedtuple('C', ['x', 'y'])
     f = MapByNameOf('x', lambda x: x + 3)
     assert f(C(1, 2)) == C(4, 2)
+
+
+def test_swap():
+    assert Swap(1, 2)([4, 5, 6]) == [4, 6, 5]
