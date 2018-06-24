@@ -1,10 +1,10 @@
 from collections import namedtuple
 import abc
 import uuid
-from typing import NamedTuple, Dict, Tuple, TypeVar, List
+from typing import NamedTuple, Dict, Tuple, Optional, List
 import numpy as np
 
-Size = TypeVar('Size', int, None)
+Size = Optional(int)
 
 
 class Columns:
