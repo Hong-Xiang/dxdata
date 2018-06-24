@@ -10,6 +10,13 @@ def test_padding_nparray():
     assert y.shape == (10, 10)
 
 
+def test_padding_ndarray_with_padded_size():
+    p = Padding(10, is_with_padded_size=True)
+    y, padded_size = p(np.ones([3, 10]))
+    assert y.shape == (10, 10)
+    assert padded_size == 7
+
+
 def test_padding_list():
     p = Padding(10, 1)
     y = p(np.ones([10, 8]))

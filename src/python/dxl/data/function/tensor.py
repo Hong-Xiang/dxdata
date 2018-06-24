@@ -127,12 +127,12 @@ dtype = _DType()
 
 
 class Padding(Function):
-    def __init__(self, size, axis=0, value=None, with_padded_size=False):
+    def __init__(self, size, axis=0, value=None, is_with_padded_size=False):
         super().__init__()
         self.size = size
         self.axis = axis
         self.value = value
-        self.with_padded_size = with_padded_size
+        self.is_with_padded_size = is_with_padded_size
 
     def _pad_size(self, x):
         return self.size - shape_list(x)[self.axis]
@@ -143,7 +143,7 @@ class Padding(Function):
         return result
 
     def _maybe_add_padded_size(self, r, size):
-        if self.with_padded_size:
+        if self.is_with_padded_size:
             return r, size
         return r
 

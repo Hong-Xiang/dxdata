@@ -152,3 +152,7 @@ class ShuffledHitsColumns(Columns):
 
     def __iter__(self):
         return self.processing(self.source_columns)
+
+
+def padded_hits_columns(path, size):
+    pass
