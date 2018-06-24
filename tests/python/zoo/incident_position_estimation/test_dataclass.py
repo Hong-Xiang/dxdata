@@ -107,3 +107,20 @@ def test_shuffled_hits_columns_shapes(hit_columns):
     expected_capacity = 16172
     assert hit_columns.shapes == {'hits': [expected_capacity, None, 4],
                                   'first_hit_index': [expected_capacity]}
+
+
+def test_padded_hits_columns_0(path_of_db):
+    columns = padded_hits_columns(path_of_db, 10, Hit, just_add_index, True)
+    h = head(columns)
+    assert isinstance(h, ShuffledHitsWithIndexAndPaddedSize)
+    assert h.first_hit_index == 0
+    assert h.padded_size == 9
+    assert h.hits.shape == (10, 4)
+
+
+def test_padded_hits_columns_1(path_of_db):
+    columns = padded_hits_columns(path_of_db, 10, Hit, just_add_index, False)
+    h = head(columns)
+    assert isinstance(h, ShuffledHitsWithIndex)
+    assert h.first_hit_index == 0
+    assert h.hits.shape == (10, 4)

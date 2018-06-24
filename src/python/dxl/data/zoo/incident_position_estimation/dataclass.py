@@ -11,7 +11,8 @@ from dxl.data.core import Columns
 from dxl.data.database import get_or_create_session
 from dxl.data.function import (Function, function, GetAttr, NestMapOf,
                                OnIterator, To, MapByNameOf, Padding,
-                               append, MapWithUnpackArgsKwargs, MapByPosition)
+                               append, MapWithUnpackArgsKwargs, MapByPosition,
+                               Swap)
 
 from . import orm
 from .query import all_photon, nb_photon
@@ -177,7 +178,7 @@ def padded_hits_columns(path, size, dataclass, shuffle, is_with_padded_size):
                >> MapByPosition(0, To(np.array))
                >> MapByPosition(0, Padding(size, is_with_padded_size=is_with_padded_size)))
     if is_with_padded_size:
-        process = (process >> MapWithUnpackArgsKwargs(append)
+        process = (process >> MapWithUnpackArgsKwargs(append) >> Swap(1, 2)
                    >> MapWithUnpackArgsKwargs(To(ShuffledHitsWithIndexAndPaddedSize)))
     else:
         process = process >> MapWithUnpackArgsKwargs(To(ShuffledHitsWithIndex))
