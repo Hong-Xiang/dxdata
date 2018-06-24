@@ -1,4 +1,4 @@
-from dxl.data.core.function import (Function, function, MultiMethods,
+from dxl.data.core.function import (Function, function, MultiMethodsFunction,
                                     MultiMethodsByTypeOfFirstArg,
                                     MultiMethodsByFirstArg)
 import numpy as np

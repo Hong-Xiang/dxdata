@@ -41,3 +41,11 @@ def test_nest_map_of_on_tuple():
 def test_nest_map_of_on_dict():
     f = NestMapOf(lambda x: x + 1)
     assert f({'x': 1, 'y': 2}) == {'x': 2, 'y': 3}
+
+
+def test_head():
+    assert head([1, 2, 3]) == 1
+
+
+def test_head_iter(gen5):
+    assert head(gen5) == 0

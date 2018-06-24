@@ -2,7 +2,8 @@ from .core import Function, function
 
 __all__ = [
     'head_arg', 'HeadNArgs', 'MultiMethodsFunction',
-    'MultiMethodsByTypeOfFirstArg', 'MultiMethodsByFirstArg'
+    'MultiMethodsByTypeOfFirstArg', 'MultiMethodsByFirstArg',
+    'GetAttr'
 ]
 
 
@@ -40,3 +41,11 @@ class MultiMethodsByTypeOfFirstArg(MultiMethodsFunction):
 class MultiMethodsByFirstArg(MultiMethodsFunction):
     def __init__(self, impls):
         super().__init__(impls, head_arg)
+
+
+class GetAttr(Function):
+    def __init__(self, name):
+        self.name = name
+
+    def __call__(self, x):
+        return getattr(x, self.name)

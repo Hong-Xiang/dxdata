@@ -3,4 +3,4 @@ Gamma incident position estimation
 """
 from .crystal import *
 
-from .dataloader import PhotonDataColumns
+from .dataclass import PhotonColumns

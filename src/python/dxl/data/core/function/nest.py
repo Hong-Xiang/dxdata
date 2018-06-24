@@ -1,7 +1,7 @@
-from .core import Function
+from .core import Function, function
 from .func import MultiMethodsByTypeOfFirstArg
 
-__all__ = ['NestMapOf', 'Take', 'Head']
+__all__ = ['NestMapOf', 'Take', 'head']
 
 
 class NestMapOf(MultiMethodsByTypeOfFirstArg):
@@ -34,4 +34,6 @@ class Take(Function):
         return [x for _, x in zip(range(self.n), it)]
 
 
-Head = Take(1)
+@function
+def head(x):
+    return Take(1)(x)[0]
