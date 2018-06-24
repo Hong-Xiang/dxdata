@@ -1,22 +1,23 @@
-from dxl.data.database import get_or_create_session
-from dxl.data.core import Columns
-import tqdm
-import numpy as np
-from .query import nb_photon, all_photon
+import random
+import typing
 from contextlib import contextmanager
 from functools import lru_cache
-import random
-from . import orm
 from typing import List
+
+import numpy as np
+
+import tqdm
+from dxl.data.core import Columns
+from dxl.data.database import get_or_create_session
+from dxl.data.function import (Function, function, GetAttr, NestMapOf,
+                               OnIterator, To, MapByNameOf, Padding)
+
+from . import orm
+from .query import all_photon, nb_photon
 
 dataset_path = '../../../data/gamma.db'
 
 # TODO: Use NamedTuple, mingrating to data class in 3.7
-
-import typing
-
-
-from dxl.data.function import function, Function
 
 
 class TensorTypes:
@@ -98,6 +99,20 @@ class ShuffledHitsWithIndex(typing.NamedTuple, TensorTypes):
         return {'hits': np.float32, 'first_hit_index': np.int32}
 
 
+class ShuffledHitsWithIndexAndPaddedSize(typing.NamedTuple, TensorTypes):
+    hits: List[Hit]
+    first_hit_index: np.int32
+    padded_size: np.int32
+
+    @classmethod
+    def shapes(cls):
+        return {'hits': [None, 4], 'first_hit_index': [], 'padded_size': []}
+
+    @classmethod
+    def dtypes(cls):
+        return {'hits': np.float32, 'first_hit_index': np.int32, 'padded_size': []}
+
+
 class ShuffleHits(Function):
     def make_result(self, hits, order):
         first_index = order.index(0)
@@ -154,5 +169,11 @@ class ShuffledHitsColumns(Columns):
         return self.processing(self.source_columns)
 
 
-def padded_hits_columns(path, size):
-    pass
+def padded_hits_columns(path, size, dataclass, shuffle, is_with_padded_size):
+    process = (GetAttr('hits')
+               >> NestMapOf(ORMTo(dataclass))
+               >> shuffle
+               >> MapByNameOf('hits', To(np.array))
+               >> MapByNameOf('hits', Padding(size))
+               >> To(ShuffledHitsWithIndex))
+    return ShuffledHitsColumns(PhotonColumns(path), OnIterator(process))

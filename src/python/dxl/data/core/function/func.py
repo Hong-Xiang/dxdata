@@ -3,7 +3,7 @@ from .core import Function, function
 __all__ = [
     'head_arg', 'HeadNArgs', 'MultiMethodsFunction',
     'MultiMethodsByTypeOfFirstArg', 'MultiMethodsByFirstArg',
-    'GetAttr'
+    'GetAttr', 'MapWithUnpackArgsKwargs'
 ]
 
 
@@ -57,3 +57,19 @@ class GetAttr(Function):
 
     def __call__(self, x):
         return getattr(x, self.name)
+
+
+class MapWithUnpackArgsKwargs(Function):
+    def __init__(self, f, is_args=True, is_kwargs=False):
+        self.f = f
+        self.is_args = is_args
+        self.is_kwargs = is_kwargs
+
+    def __call__(self, ipt):
+        if self.is_args and self.is_kwargs:
+            args, kwargs = ipt
+        elif self.is_args and not self.is_kwargs:
+            args, kwargs = ipt, {}
+        elif not self.is_args and self.is_kwargs:
+            args, kwargs = (), ipt
+        return self.f(*args, **kwargs)
