@@ -35,7 +35,15 @@ class MultiMethodsFunction(Function):
 
 class MultiMethodsByTypeOfFirstArg(MultiMethodsFunction):
     def __init__(self, impls):
-        super().__init__(impls, head_arg >> type)
+        super().__init__(impls, self._finder)
+
+    def _finder(self, *args, **kwargs):
+        if type(args[0]) in self.impls:
+            return type(args[0])
+        for k in self.impls:
+            if isinstance(k, type) and isinstance(args[0], k):
+                return k
+        return type(args[0])
 
 
 class MultiMethodsByFirstArg(MultiMethodsFunction):

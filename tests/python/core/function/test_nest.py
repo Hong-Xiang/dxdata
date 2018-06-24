@@ -1,6 +1,8 @@
 from dxl.data.core.function.nest import *
 
 import pytest
+import typing
+from collections import namedtuple
 
 
 @pytest.fixture
@@ -49,3 +51,23 @@ def test_head():
 
 def test_head_iter(gen5):
     assert head(gen5) == 0
+
+
+def test_select_map_of_on_dict():
+    d = {'x': 1, 'y': 2}
+    f = MapByNameOf('x', lambda x: x + 3)
+    assert f(d) == {'x': 4, 'y': 2}
+
+
+def test_select_map_of_on_typing_named_tuple():
+    class C(typing.NamedTuple):
+        x: int
+        y: int
+    f = MapByNameOf('x', lambda x: x + 3)
+    assert f(C(1, 2)) == C(4, 2)
+
+
+def test_select_map_of_on_named_tuple():
+    C = namedtuple('C', ['x', 'y'])
+    f = MapByNameOf('x', lambda x: x + 3)
+    assert f(C(1, 2)) == C(4, 2)
