@@ -20,9 +20,11 @@ from dxl.data.function import function, Function
 
 
 class TensorTypes:
+    @classmethod
     def dtypes(self):
         raise NotImplementedError
 
+    @classmethod
     def shapes(self):
         raise NotImplementedError
 
@@ -37,13 +39,13 @@ class Hit(typing.NamedTuple, TensorTypes):
     def from_orm(cls, o: orm.Hit):
         return Hit(o.x, o.y, o.z, o.energy)
 
-    @property
-    def dtypes(self):
-        return self._field_types
+    @classmethod
+    def dtypes(cls):
+        return cls._field_types
 
-    @property
-    def shapes(self):
-        return {k: [] for k in self.dtypes}
+    @classmethod
+    def shapes(cls):
+        return {k: [] for k in cls.dtypes}
 
 
 class HitWithCrystalCenter(Hit):
@@ -55,13 +57,13 @@ class HitWithCrystalCenter(Hit):
 class Photon(typing.NamedTuple, TensorTypes):
     hits: List[orm.Hit]
 
-    @property
-    def dtypes(self):
-        return {k: orm.Hit for k in self._field_types}
+    @classmethod
+    def dtypes(cls):
+        return {k: orm.Hit for k in cls._field_types}
 
-    @property
-    def shapes(self):
-        return {k: [None] for k in self._field_types}
+    @classmethod
+    def shapes(cls):
+        return {k: [None] for k in cls._field_types}
 
 
 class PhotonColumns(Columns):
@@ -69,29 +71,6 @@ class PhotonColumns(Columns):
         super().__init__(Photon)
         self.path = path
         self.session = get_or_create_session(self.path)
-
-    # def _process(self, data):
-    #     if isinstance(data, str):
-    #         path = data
-    #         is_shuffle = True
-    #     else:
-    #         path = data['path']
-    #         is_shuffle = data['is_shuffle']
-    #     self.is_shuffle = is_shuffle
-    #     self.is_crystal_center = data['is_crystal_center']
-    #     return get_or_create_session(path)
-
-    @property
-    def types(self):
-        return (np.float32, np.int32)
-
-    @property
-    def shapes(self):
-        return ([None, 4], [None])
-
-    @property
-    def columns(self):
-        return ('hits', 'first_hit')
 
     @property
     @lru_cache(1)
@@ -110,12 +89,12 @@ class ShuffledHitsWithIndex(typing.NamedTuple, TensorTypes):
     hits: List[Hit]
     first_hit_index: np.int32
 
-    @property
-    def shapes(self):
-        return {'hits': [None, 4], 'first_hit_index': [None]}
+    @classmethod
+    def shapes(cls):
+        return {'hits': [None, 4], 'first_hit_index': []}
 
-    @property
-    def dtypes(self):
+    @classmethod
+    def dtypes(cls):
         return {'hits': np.float32, 'first_hit_index': np.int32}
 
 
@@ -159,3 +138,17 @@ class ORMTo(Function):
 
     def __call__(self, o):
         return self.dataclass.from_orm(o)
+
+
+class ShuffledHitsColumns(Columns):
+    def __init__(self, source_columns: Columns, processing):
+        super().__init__(ShuffledHitsWithIndex)
+        self.source_columns = source_columns
+        self.processing = processing
+
+    @property
+    def capacity(self):
+        return self.source_columns.capacity
+
+    def __iter__(self):
+        return self.processing(self.source_columns)

@@ -20,17 +20,20 @@ class Columns:
     def columns(self):
         return self.dataclass._fields
 
+    @property
     def capacity(self) -> Size:
         raise NotImplementedError
 
+    @property
     def shapes(self) -> Dict[str, List[Size]]:
         return {
             k: [self.capacity] + v
-            for k, v in self.dataclass.shapes.items()
+            for k, v in self.dataclass.shapes().items()
         }
 
-    def dtypes(self) -> Tuple[type]:
-        return self.dataclass.dtypes
+    @property
+    def dtypes(self) -> Dict[str, type]:
+        return self.dataclass.dtypes()
 
     def __iter__(self):
         raise NotImplementedError

@@ -77,3 +77,27 @@ def test_load_without_crystal_center(photon_columns):
     data = head(hits_iterator)
     np.sum(np.abs(np.array(data.hits[1][:3])
                   - np.array(data.hits[2][:3]))) > 0.5
+
+
+@pytest.fixture
+def hit_columns(photon_columns):
+    orms_to_hits = (GetAttr('hits')
+                    >> NestMapOf(ORMTo(Hit))
+                    >> just_add_index
+                    >> To(ShuffledHitsWithIndex))
+    return ShuffledHitsColumns(photon_columns, OnIterator(orms_to_hits))
+
+
+def test_shuffled_hits_columns_columns(hit_columns):
+    assert hit_columns.columns == ('hits', 'first_hit_index')
+
+
+def test_shuffled_hits_columns_dtypes(hit_columns):
+    assert hit_columns.dtypes == {'hits': np.float32,
+                                  'first_hit_index': np.int32}
+
+
+def test_shuffled_hits_columns_shapes(hit_columns):
+    expected_capacity = 16172
+    assert hit_columns.shapes == {'hits': [expected_capacity, None, 4],
+                                  'first_hit_index': [expected_capacity]}
