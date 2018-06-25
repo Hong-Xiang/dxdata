@@ -1,6 +1,6 @@
 from dxl.data.core import function, Function
 
-__all__ = ['is_decay', 'AllIsInstance']
+__all__ = ['is_decay', 'AllIsInstance', 'MapIf', 'Always']
 
 
 @function
@@ -14,3 +14,23 @@ class AllIsInstance(Function):
 
     def __call__(self, it):
         return all(map(lambda o: isinstance(o, self.target_type), it))
+
+
+class MapIf(Function):
+    def __init__(self, cond, f):
+        self.cond = cond
+        self.f = f
+
+    def __call__(self, x):
+        if self.cond(x):
+            return self.f(x)
+        else:
+            return x
+
+
+class Always(Function):
+    def __init__(self, value):
+        self.value = value
+
+    def __call__(self, *args, **kwargs):
+        return self.value

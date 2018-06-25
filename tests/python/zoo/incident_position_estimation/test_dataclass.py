@@ -9,7 +9,7 @@ import numpy as np
 
 @pytest.fixture
 def photon_columns(path_of_db):
-    return PhotonColumns(path_of_db)
+    return PhotonColumns(path_of_db, Hit)
 
 
 @pytest.fixture
@@ -24,11 +24,12 @@ def test_load_photon(photon_columns):
 
 
 def test_orm_to(photon_columns):
-    orms_to_hits = GetAttr('hits') >> NestMapOf(ORMTo(Hit))
-    load_one_photon = OnIterator(orms_to_hits) >> head
-    hits = load_one_photon(photon_columns)
-    assert isinstance(hits, list)
-    assert AllIsInstance(Hit)(hits)
+    # orms_to_hits = GetAttr('hits') >> NestMapOf(ORMTo(Hit))
+    # load_one_photon = OnIterator(orms_to_hits) >> head
+    p = head(photon_columns)
+    assert isinstance(p, Photon)
+    assert isinstance(p.hits, list)
+    assert AllIsInstance(Hit)(p.hits)
 
 
 @pytest.fixture
@@ -54,7 +55,6 @@ def test_random_shuffle_hits(hits):
 
 def test_load_photons_to_hits(photon_columns, hits_list_to_named_tuple):
     orms_to_hits = (GetAttr('hits')
-                    >> NestMapOf(ORMTo(Hit))
                     >> sort_hits_by_energy
                     >> hits_list_to_named_tuple)
     load_one_photon = OnIterator(orms_to_hits) >> head
@@ -62,9 +62,9 @@ def test_load_photons_to_hits(photon_columns, hits_list_to_named_tuple):
     assert isinstance(hits, ShuffledHitsWithIndex)
 
 
-def test_load_with_crystal_center(photon_columns, hits_list_to_named_tuple):
+def test_load_with_crystal_center(path_of_db, hits_list_to_named_tuple):
+    photon_columns = PhotonColumns(path_of_db, HitWithCrystalCenter)
     orms_to_hits = (GetAttr('hits')
-                    >> NestMapOf(ORMTo(HitWithCrystalCenter))
                     >> just_add_index
                     >> hits_list_to_named_tuple)
     hits_iterator = OnIterator(orms_to_hits)(photon_columns)
@@ -75,7 +75,6 @@ def test_load_with_crystal_center(photon_columns, hits_list_to_named_tuple):
 
 def test_load_without_crystal_center(photon_columns, hits_list_to_named_tuple):
     orms_to_hits = (GetAttr('hits')
-                    >> NestMapOf(ORMTo(Hit))
                     >> just_add_index
                     >> hits_list_to_named_tuple)
     hits_iterator = OnIterator(orms_to_hits)(photon_columns)
@@ -87,11 +86,11 @@ def test_load_without_crystal_center(photon_columns, hits_list_to_named_tuple):
 
 @pytest.fixture
 def hit_columns(photon_columns):
-    orms_to_hits = (GetAttr('hits')
-                    >> NestMapOf(ORMTo(Hit))
-                    >> just_add_index
-                    >> To(ShuffledHitsWithIndex))
-    return ShuffledHitsColumns(photon_columns, ShuffledHitsWithIndex, OnIterator(orms_to_hits))
+    photon2shuffled_hits = (GetAttr('hits')
+                            >> just_add_index
+                            >> hits_list_to_named_tuple)
+    return ShuffledHitsColumns(photon_columns, ShuffledHitsWithIndex,
+                               OnIterator(photon2shuffled_hits))
 
 
 def test_shuffled_hits_columns_columns(hit_columns):

@@ -1,4 +1,4 @@
-from dxl.data.database.engine import get_or_create_session
+from dxl.data.database.engine import get_or_create_session, session_scope, session_factory
 from .orm import Coincidence, Event, Photon, Hit, Crystal, Experiment
 from tqdm import tqdm
 import numpy as np
@@ -7,26 +7,28 @@ from pprint import pprint
 
 from contextlib import contextmanager
 
+from dxl.data.function import function
 
-def bind_path(path):
+
+def bind_path(session):
     return get_or_create_session(path)
 
 
-def nb_hits():
-    return get_or_create_session().query(Hit).count()
+def nb_hits(path):
+    with session_scope(session_factory(path)) as sess:
+        return sess.query(Hit).count()
 
 
-def nb_photon():
-    return get_or_create_session().query(Photon).count()
+def nb_photon(path):
+    with session_scope(session_factory(path)) as sess:
+        return sess.query(Photon).count()
 
 
-def nb_crystal():
-    return get_or_create_session().query(Crystal).count()
+def nb_crystal(session):
+    return session.query(Crystal).count()
 
 
-def nb_experiments(session=None):
-    if session is None:
-        session = get_or_create_session()
+def nb_experiments(session):
     return session.query(Experiment).distinct().count()
 
 
@@ -61,13 +63,14 @@ def all_photon(session):
     return session.query(Photon)
 
 
+@function
+def first_photon(session, offset):
+    p = session.query(Photon).offset(offset).first()
+    return p, p.id
+
+
 def all_hits_group_by_photon(limit=10):
     return get_or_create_session().query(Photon.hits).limit(limit).all()
-
-
-@contextmanager
-def hits_generator():
-    get_or_create_session().query(Photon.hits)
 
 
 def get_first_hits_for_all_photon():

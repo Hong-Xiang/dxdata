@@ -4,7 +4,7 @@ import uuid
 from typing import NamedTuple, Dict, Tuple, Optional, List
 import numpy as np
 
-Size = Optional(int)
+Size = Optional[int]
 
 
 class Columns:
@@ -39,6 +39,6 @@ class Columns:
         raise NotImplementedError
 
 
-class IndexedColumns(Columns):
+class ColumnsWithIndex(Columns):
     def __getitem__(self, index) -> NamedTuple:
         raise NotImplementedError

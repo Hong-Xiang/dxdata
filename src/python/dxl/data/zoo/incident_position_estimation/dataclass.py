@@ -8,16 +8,16 @@ import numpy as np
 
 import tqdm
 from dxl.data.core import Columns
-from dxl.data.database import get_or_create_session
+from dxl.data.database import get_or_create_session, DBScannerWith
 from dxl.data.function import (Function, function, GetAttr, NestMapOf,
                                OnIterator, To, MapByNameOf, Padding,
                                append, MapWithUnpackArgsKwargs, MapByPosition,
                                Swap)
 
-from . import orm
-from .query import all_photon, nb_photon
 
-dataset_path = '../../../data/gamma.db'
+from . import orm
+from .query import all_photon, nb_photon, first_photon
+
 
 # TODO: Use NamedTuple, mingrating to data class in 3.7
 
@@ -58,11 +58,11 @@ class HitWithCrystalCenter(Hit):
 
 
 class Photon(typing.NamedTuple, TensorTypes):
-    hits: List[orm.Hit]
+    hits: List[Hit]
 
     @classmethod
     def dtypes(cls):
-        return {k: orm.Hit for k in cls._field_types}
+        return {k: Hit for k in cls._field_types}
 
     @classmethod
     def shapes(cls):
@@ -70,22 +70,36 @@ class Photon(typing.NamedTuple, TensorTypes):
 
 
 class PhotonColumns(Columns):
-    def __init__(self, path):
+    def __init__(self, path, hit_dataclass):
         super().__init__(Photon)
         self.path = path
-        self.session = get_or_create_session(self.path)
+        self.hit_dataclass = hit_dataclass
 
     @property
     @lru_cache(1)
     def capacity(self):
-        return nb_photon()
+        return nb_photon(self.path)
+
+    def _make_db_scanner(self):
+        return DBScannerWith(self.path,
+                             first_photon
+                             >> MapByPosition(0, GetAttr('hits'))
+                             >> MapByPosition(0, NestMapOf(ORMTo(self.hit_dataclass)))
+                             >> MapByPosition(0, To(Photon)))
 
     def __iter__(self):
-        def make_iterator():
-            for p in all_photon(self.session):
-                yield Photon(list(p.hits))
+        return iter(self._make_db_scanner())
 
-        return make_iterator()
+    @property
+    def dtypes(self):
+        return {'hits': self.hit_dataclass}
+
+        # def make_iterator():
+
+        #     for p in all_photon(self.path):
+        #         yield Photon(list(p.hits))
+
+        # return make_iterator()
 
 
 class ShuffledHitsWithIndex(typing.NamedTuple, TensorTypes):
@@ -112,7 +126,7 @@ class ShuffledHitsWithIndexAndPaddedSize(typing.NamedTuple, TensorTypes):
 
     @classmethod
     def dtypes(cls):
-        return {'hits': np.float32, 'first_hit_index': np.int32, 'padded_size': []}
+        return {'hits': np.float32, 'first_hit_index': np.int32, 'padded_size': np.int32}
 
 
 class ShuffleHits(Function):
@@ -171,9 +185,8 @@ class ShuffledHitsColumns(Columns):
         return self.processing(self.source_columns)
 
 
-def padded_hits_columns(path, size, dataclass, shuffle, is_with_padded_size):
+def padded_hits_columns(path, size, hit_dataclass, shuffle, is_with_padded_size):
     process = (GetAttr('hits')
-               >> NestMapOf(ORMTo(dataclass))
                >> shuffle
                >> MapByPosition(0, To(np.array))
                >> MapByPosition(0, Padding(size, is_with_padded_size=is_with_padded_size)))
@@ -183,4 +196,4 @@ def padded_hits_columns(path, size, dataclass, shuffle, is_with_padded_size):
     else:
         dataclass = ShuffledHitsWithIndex
     process = process >> MapWithUnpackArgsKwargs(To(dataclass))
-    return ShuffledHitsColumns(PhotonColumns(path), dataclass, OnIterator(process))
+    return ShuffledHitsColumns(PhotonColumns(path, hit_dataclass), dataclass, OnIterator(process))
