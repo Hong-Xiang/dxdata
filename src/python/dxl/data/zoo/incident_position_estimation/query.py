@@ -64,9 +64,13 @@ def all_photon(session):
 
 
 @function
-def first_photon(session, offset):
-    p = session.query(Photon).offset(offset).first()
-    return p, p.id
+def first_photon(session, offset, limit=1):
+    p = session.query(Photon).offset(offset).limit(limit).all()
+    if p is None:
+        return None, None
+    if limit == 1:
+        return p[0], p[0].id
+    return p, p[-1].id
 
 
 def all_hits_group_by_photon(limit=10):

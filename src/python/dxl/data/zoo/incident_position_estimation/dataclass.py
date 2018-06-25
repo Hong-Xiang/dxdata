@@ -8,7 +8,7 @@ import numpy as np
 
 import tqdm
 from dxl.data.core import Columns
-from dxl.data.database import get_or_create_session, DBScannerWith
+from dxl.data.database import get_or_create_session, DBScannerWith, ChunkedDBScannerWith
 from dxl.data.function import (Function, function, GetAttr, NestMapOf,
                                OnIterator, To, MapByNameOf, Padding,
                                append, MapWithUnpackArgsKwargs, MapByPosition,
@@ -81,11 +81,16 @@ class PhotonColumns(Columns):
         return nb_photon(self.path)
 
     def _make_db_scanner(self):
-        return DBScannerWith(self.path,
-                             first_photon
-                             >> MapByPosition(0, GetAttr('hits'))
-                             >> MapByPosition(0, NestMapOf(ORMTo(self.hit_dataclass)))
-                             >> MapByPosition(0, To(Photon)))
+        chunked = True
+        process = (GetAttr('hits')
+                   >> NestMapOf(ORMTo(self.hit_dataclass))
+                   >> To(Photon))
+        if chunked:
+            process = NestMapOf(process)
+            scanner_type = ChunkedDBScannerWith
+        else:
+            scanner_type = DBScannerWith
+        return scanner_type(self.path, first_photon >> MapByPosition(0, process))
 
     def __iter__(self):
         return iter(self._make_db_scanner())

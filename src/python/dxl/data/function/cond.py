@@ -34,3 +34,16 @@ class Always(Function):
 
     def __call__(self, *args, **kwargs):
         return self.value
+
+
+class Switch(Function):
+    def __init__(self, cond, f_true, f_false):
+        self.cond = cond
+        self.f_true = f_true
+        self.f_false = f_false
+
+    def __call__(self, x):
+        if self.cond(x):
+            return self.f_true(x)
+        else:
+            return self.f_false(x)
