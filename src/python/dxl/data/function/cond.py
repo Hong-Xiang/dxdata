@@ -47,3 +47,8 @@ class Switch(Function):
             return self.f_true(x)
         else:
             return self.f_false(x)
+
+
+@function
+def is_none(x):
+    return x is None

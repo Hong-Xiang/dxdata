@@ -21,6 +21,8 @@ from .query import all_photon, nb_photon, first_photon
 
 # TODO: Use NamedTuple, mingrating to data class in 3.7
 
+__all__ = ['Hit', 'HitWithCrystalCenter', 'Photon', 'PhotonColumns']
+
 
 class TensorTypes:
     @classmethod
@@ -70,10 +72,11 @@ class Photon(typing.NamedTuple, TensorTypes):
 
 
 class PhotonColumns(Columns):
-    def __init__(self, path, hit_dataclass):
+    def __init__(self, path, hit_dataclass, is_chunked=False):
         super().__init__(Photon)
         self.path = path
         self.hit_dataclass = hit_dataclass
+        self.is_chunked = is_chunked
 
     @property
     @lru_cache(1)
@@ -81,11 +84,10 @@ class PhotonColumns(Columns):
         return nb_photon(self.path)
 
     def _make_db_scanner(self):
-        chunked = True
         process = (GetAttr('hits')
                    >> NestMapOf(ORMTo(self.hit_dataclass))
                    >> To(Photon))
-        if chunked:
+        if self.is_chunked:
             process = NestMapOf(process)
             scanner_type = ChunkedDBScannerWith
         else:
@@ -134,6 +136,9 @@ class ShuffledHitsWithIndexAndPaddedSize(typing.NamedTuple, TensorTypes):
         return {'hits': np.float32, 'first_hit_index': np.int32, 'padded_size': np.int32}
 
 
+__all__ += ['ShuffledHitsWithIndex', 'ShuffledHitsWithIndexAndPaddedSize']
+
+
 class ShuffleHits(Function):
     def make_result(self, hits, order):
         first_index = order.index(0)
@@ -166,6 +171,8 @@ class SortHitsByEnergy(ShuffleHits):
 
 
 sort_hits_by_energy = SortHitsByEnergy()
+
+__all__ += ['random_shuffle_hits', 'just_add_index', 'sort_hits_by_energy']
 
 
 class ORMTo(Function):
@@ -202,3 +209,6 @@ def padded_hits_columns(path, size, hit_dataclass, shuffle, is_with_padded_size)
         dataclass = ShuffledHitsWithIndex
     process = process >> MapWithUnpackArgsKwargs(To(dataclass))
     return ShuffledHitsColumns(PhotonColumns(path, hit_dataclass), dataclass, OnIterator(process))
+
+
+__all__ += ['ORMTo', 'ShuffledHitsColumns', 'padded_hits_columns']
