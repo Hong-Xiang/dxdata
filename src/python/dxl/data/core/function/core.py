@@ -6,6 +6,19 @@ __all__ = [
     'OnIterator'
 ]
 
+from contextlib import contextmanager
+
+
+class CallContext:
+    def __init__(self, f, *args, **kwargs):
+        self.args = args
+        self.kwargs = kwargs
+        self.f = f
+        self.prev = None
+
+    def __enter__(self):
+        self.prev = self.f._call_ctx()
+
 
 class Function:
     def __call__(self, *args, **kwargs):
@@ -13,6 +26,9 @@ class Function:
 
     def __rshift__(self, f):
         return ChainedFunction(self, f)
+
+    def _call_ctx(self):
+        pass
 
 
 class WrappedFunction(Function):

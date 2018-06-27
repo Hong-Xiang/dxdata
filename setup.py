@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 setup(
     name='dxl-data',
-    version='0.0.14',
+    version='0.0.15',
     description='Data Processing Library.',
     url='https://github.com/Hong-Xiang/dxdata',
     author='Hong Xiang',
