@@ -67,6 +67,16 @@ class OnIterator(Function):
         return result()
 
 
+class LambdaMaker:
+    def __getattr__(self, *args, **kwargs):
+        return lambda _: getattr(_, *args, **kwargs)
+
+    def __getitem__(self, *args, **kwargs):
+        return lambda _: _.__getitem__(*args, **kwargs)
+
+
+_ = LambdaMaker()
+
 # class MultiDispatchByFirstArg(MultiDispatchByArgs):
 #     def __init__(self, implements):
 #         super().__init__(implements, 1)

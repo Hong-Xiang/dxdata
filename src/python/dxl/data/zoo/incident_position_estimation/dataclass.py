@@ -16,7 +16,7 @@ from dxl.data.function import (Function, function, GetAttr, NestMapOf,
 
 
 from . import orm
-from .query import all_photon, nb_photon, first_photon
+from .query import all_photon, nb_photon, first_photon, all_photon_hits
 
 
 # TODO: Use NamedTuple, mingrating to data class in 3.7
@@ -87,12 +87,14 @@ class PhotonColumns(Columns):
         process = (GetAttr('hits')
                    >> NestMapOf(ORMTo(self.hit_dataclass))
                    >> To(Photon))
+        # process = (NestMapOf(ORMTo(self.hit_dataclass))
+        #    >> To(Photon))
         if self.is_chunked:
             process = NestMapOf(process)
             scanner_type = ChunkedDBScannerWith
         else:
             scanner_type = DBScannerWith
-        return scanner_type(self.path, first_photon >> MapByPosition(0, process))
+        return scanner_type(self.path, function(all_photon_hits) >> process)
 
     def __iter__(self):
         return iter(self._make_db_scanner())

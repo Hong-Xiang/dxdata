@@ -4,7 +4,7 @@ from tqdm import tqdm
 import numpy as np
 import click
 from pprint import pprint
-
+from sqlalchemy.orm import joinedload
 from contextlib import contextmanager
 
 from dxl.data.function import function
@@ -61,6 +61,15 @@ def hit_crystal_tuple():
 
 def all_photon(session):
     return session.query(Photon)
+
+
+def all_photon_hits(session, offset=None, limit=None):
+    q = session.query(Photon).options(joinedload(Photon.hits, innerjoin=True))
+    if offset is not None:
+        q = q.offset(offset)
+    if limit is not None:
+        q = q.limit(limit).all()
+    return q
 
 
 @function

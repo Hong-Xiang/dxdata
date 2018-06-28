@@ -1,6 +1,8 @@
 from typing import Dict
 import numpy as np
 import h5py
+from tables import *
+from tqdm import tqdm
 
 
 def h5_add_dataset(h5group, dct_of_ndarray, batch_dim=0, tqdm=None):
@@ -63,10 +65,10 @@ def save_h5(file_path,
 def load_h5(path_file, path_dataset=None, slices=None):
     """
     Load numpy.ndarray from HDF5 file.
-    
+
     Args:
     - `path_file`: `str` or `pathlib.Path`, path of hdf5 file
-    - `path_dataset`: dataset path in file 
+    - `path_dataset`: dataset path in file
     - `slices`: tuple of slice objects or `None`, or str
     """
     if isinstance(slices, str):
@@ -79,3 +81,47 @@ def load_h5(path_file, path_dataset=None, slices=None):
             return np.array(fin[path_dataset])
         else:
             return np.array(fin[path_dataset][slices])
+
+
+from typing import NamedTuple, Iterator
+
+
+class PyTableMaker:
+    def __init__(self, path, dataclass, processing=..., limit=None):
+        self.path = path
+        self.dataclass = dataclass
+        if processing is ...:
+            processing = self.tqdm_processing
+        self.processing = processing
+        self.limit = limit
+
+    @classmethod
+    def default_converter(cls, row, x):
+        for i, k in enumerate(x._fields):
+            row[k] = x[i]
+        row.append()
+
+    def tqdm_processing(self, iter_source):
+        reporter = tqdm()
+
+        def it():
+            for x in iter_source:
+                yield x
+                reporter.update()
+        return it()
+
+    def make(self, raw_dataclass_iterator: Iterator[NamedTuple], converter=None):
+        h5file = open_file(self.path, mode="w")
+        group = h5file.create_group("/", "photon_hits")
+        table = h5file.create_table(group, "simluated", self.dataclass)
+        if converter is None:
+            converter = self.default_converter
+        events = 0
+        for x in self.processing(raw_dataclass_iterator):
+            converter(table.row, x)
+            events += 1
+            if self.limit is not None and events > self.limit:
+                break
+        table.flush()
+        h5file.close()
+        return events
