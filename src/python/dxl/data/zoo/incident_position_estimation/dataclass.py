@@ -16,7 +16,7 @@ from dxl.data.function import (Function, function, GetAttr, NestMapOf,
 
 
 from . import orm
-from .query import all_photon, nb_photon, first_photon, all_photon_hits
+from .query import nb_photon, chunked_photon_hits, chunked_photon_hits_with_crystals
 
 
 # TODO: Use NamedTuple, mingrating to data class in 3.7
@@ -72,11 +72,11 @@ class Photon(typing.NamedTuple, TensorTypes):
 
 
 class PhotonColumns(Columns):
-    def __init__(self, path, hit_dataclass, is_chunked=False):
+    def __init__(self, path, hit_dataclass, chunk=100000):
         super().__init__(Photon)
         self.path = path
         self.hit_dataclass = hit_dataclass
-        self.is_chunked = is_chunked
+        self.chunk = chunk
 
     @property
     @lru_cache(1)
@@ -84,17 +84,16 @@ class PhotonColumns(Columns):
         return nb_photon(self.path)
 
     def _make_db_scanner(self):
-        process = (GetAttr('hits')
-                   >> NestMapOf(ORMTo(self.hit_dataclass))
-                   >> To(Photon))
-        # process = (NestMapOf(ORMTo(self.hit_dataclass))
-        #    >> To(Photon))
-        if self.is_chunked:
-            process = NestMapOf(process)
-            scanner_type = ChunkedDBScannerWith
-        else:
-            scanner_type = DBScannerWith
-        return scanner_type(self.path, function(all_photon_hits) >> process)
+        process = NestMapOf((GetAttr('hits')
+                             >> NestMapOf(ORMTo(self.hit_dataclass))
+                             >> To(Photon)))
+        query = {
+            Hit: chunked_photon_hits,
+            HitWithCrystalCenter: chunked_photon_hits_with_crystals
+        }[self.hit_dataclass]
+        return ChunkedDBScannerWith(self.path,
+                                    function(query) >> process,
+                                    self.chunk)
 
     def __iter__(self):
         return iter(self._make_db_scanner())

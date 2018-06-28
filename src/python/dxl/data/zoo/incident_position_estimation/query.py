@@ -64,12 +64,25 @@ def all_photon(session):
 
 
 def all_photon_hits(session, offset=None, limit=None):
-    q = session.query(Photon).options(joinedload(Photon.hits, innerjoin=True))
+    q = (session.query(Photon).options(joinedload(Photon.hits, innerjoin=True)))
     if offset is not None:
         q = q.offset(offset)
     if limit is not None:
         q = q.limit(limit).all()
     return q
+
+
+def chunked_photon_hits_with_crystals(session, offset, limit):
+    return (session.query(Photon)
+            .options(joinedload(Photon.hits)
+                     .joinedload(Hit.crystal))
+            .offset(offset).limit(limit).all())
+
+
+def chunked_photon_hits(session, offset, limit):
+    return (session.query(Photon)
+            .options(joinedload(Photon.hits))
+            .offset(offset).limit(limit).all())
 
 
 @function
