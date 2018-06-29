@@ -60,78 +60,9 @@ class chunked(SimpleNamespace):
             return cls.chunked_query(q, func, limit, offset)
 
     @classmethod
-    def photon_hits2(cls, path, func, limit=None, offset=None):
-        with query_scope(path) as sess:
-            q = (sess.query(Photon)
-                 .options(subqueryload(Photon.hits)
-                          .subqueryload(Hit.crystal)))
-            return cls.chunked_query(q, func, limit, offset)
-
-    @classmethod
-    def photon_hits3(cls, path, func, limit=None, offset=None):
-        with query_scope(path) as sess:
-            q = sess.query(Photon).options(selectinload(Photon.hits))
-            return cls.chunked_query(q, func, limit, offset)
-
-    @classmethod
-    def photon_hits4(cls, path, func, limit=None, offset=None):
-        with query_scope(path) as sess:
-            q = (sess.query(Photon)
-                 .options(selectinload(Photon.hits)
-                          .selectinload(Hit.crystal)))
-            return cls.chunked_query(q, func, limit, offset)
-
-    @classmethod
-    def photon_hits5(cls, path, func, limit=None, offset=None):
-        with query_scope(path) as sess:
-            q = sess.query(Photon).options(
-                joinedload(Photon.hits, innerjoin=True))
-            return cls.chunked_query(q, func, limit, offset)
-
-    @classmethod
-    def photon_hits6(cls, path, func, limit=None, offset=None):
-        with query_scope(path) as sess:
-            q = (sess.query(Photon)
-                 .options(joinedload(Photon.hits, innerjoin=True)
-                          .joinedload(Hit.crystal, innerjoin=True)))
-            return cls.chunked_query(q, func, limit, offset)
-
-    @classmethod
-    def photon(cls, path, func, limit=None, offset=None):
-        with query_scope(path) as sess:
-            q = sess.query(Photon)
-            return cls.chunked_query(q, func, limit, offset)
-
-    @classmethod
     def coincidence(cls, path, func, limit=None, offset=None):
         with query_scope(path) as sess:
-            return cls.chunked_query(sess.query(Coincidence), func, limit, offset)
-
-    # @classmethod
-    # def coincidence_events(cls, path, func, limit=None, offset=None):
-    #     with query_scope(path) as sess:
-    #         return cls.chunked_query(sess.query(Coincidence.events)
-    #                                  .options(joinedload(Event.photons)), func, limit, offset)
-
-    @classmethod
-    def coincidence_events(cls, path, func, limit=None, offset=None):
-        with query_scope(path) as sess:
-            return cls.chunked_query(sess.query(Coincidence.events), func, limit, offset)
-
-    # @classmethod
-    # def photon_hits_crystal(cls, path, func, limit=None, offset=None):
-    #     with query_scope(path) as sess:
-    #         q = (sess.query(Photon)
-    #              .options(joinedload(Photon.hits, innerjoin=True)
-    #                       .joinedload(Hit.crystal, innerjoin=True)))
-    #         return cls.chunked_query(q, func, limit, offset)
-
-    # @classmethod
-    # def coincidence_photon_hits_crystal(cls, path, func, limit=None, offset=None):
-    #     with query_scope(path) as sess:
-    #         q = (sess.quary(Coincidence)
-    #              .option(joinedload(Coincidence.events, innerjoin=True)
-    #                      .joinedload(Event.photons, innerjoin=True)
-    #                      .joinedload(Photon.hits, innerjoin=True)
-    #                      .joinedload(Hit.crystal, innerjoin=True)))
-    #         return cls.chunked_query(q, func, limit, offset)
+            return cls.chunked_query(sess.query(Coincidence)
+                                     .options(subqueryload(Coincidence.events)
+                                              .subqueryload(Event.photons)
+                                              .subqueryload(Photon.hits)), func, limit, offset)
