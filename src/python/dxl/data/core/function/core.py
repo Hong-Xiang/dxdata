@@ -3,7 +3,7 @@ from dxl.data import utils
 
 __all__ = [
     'Function', 'WrappedFunction', 'function', 'ChainedFunction', 'identity',
-    'OnIterator'
+    'OnIterator', 'x'
 ]
 
 from contextlib import contextmanager
@@ -69,13 +69,13 @@ class OnIterator(Function):
 
 class LambdaMaker:
     def __getattr__(self, *args, **kwargs):
-        return lambda _: getattr(_, *args, **kwargs)
+        return function(lambda _: getattr(_, *args, **kwargs))
 
     def __getitem__(self, *args, **kwargs):
-        return lambda _: _.__getitem__(*args, **kwargs)
+        return function(lambda _: _.__getitem__(*args, **kwargs))
 
 
-_ = LambdaMaker()
+x = LambdaMaker()
 
 # class MultiDispatchByFirstArg(MultiDispatchByArgs):
 #     def __init__(self, implements):

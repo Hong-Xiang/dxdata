@@ -1,6 +1,6 @@
 from dxl.data.core import function, Function
 
-__all__ = ['is_decay', 'AllIsInstance', 'MapIf', 'Always']
+__all__ = ['is_decay', 'AllIsInstance', 'MapIf', 'Always', 'Filter']
 
 
 @function
@@ -47,6 +47,18 @@ class Switch(Function):
             return self.f_true(x)
         else:
             return self.f_false(x)
+
+
+class Filter(Function):
+    def __init__(self, cond):
+        self.cond = cond
+
+    def __call__(self, it):
+        def it_():
+            for x in it:
+                if self.cond(x):
+                    yield x
+        return it_()
 
 
 @function

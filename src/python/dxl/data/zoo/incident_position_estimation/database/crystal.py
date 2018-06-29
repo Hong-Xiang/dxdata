@@ -28,7 +28,7 @@ class ScannerSpec:
     @property
     def nb_detectors_per_block(self):
         return self.nb_detectors_per_ring // self.nb_blocks * self.nb_rings
-    
+
     @property
     def nb_detectors(self):
         return self.nb_detectors_per_ring * self.nb_rings

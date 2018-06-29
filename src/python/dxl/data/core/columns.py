@@ -42,3 +42,9 @@ class Columns:
 class ColumnsWithIndex(Columns):
     def __getitem__(self, index) -> NamedTuple:
         raise NotImplementedError
+
+    def __iter__(self):
+        def it():
+            for i in range(self.capacity):
+                yield self.__getitem__(i)
+        return it()

@@ -5,7 +5,7 @@ class CLI(click.MultiCommand):
     commands = {'statistics': None, 'db': None, 'zoo': None}
 
     def __init__(self):
-        super(__class__, self).__init__(
+        super().__init__(
             name='dxdata', help='Data processing CLI.')
 
     def list_commands(self, ctx):
