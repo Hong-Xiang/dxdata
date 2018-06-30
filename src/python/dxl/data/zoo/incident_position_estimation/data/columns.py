@@ -37,6 +37,8 @@ class RawDataColumns(ColumnsWithIndexInMemory):
             limit = self.limit
         while offset < limit:
             limit_ = min(limit - offset, self.chunk)
+            print('Loading database, {} of {} with chunk {} ...'.format(
+                offset, limit, self.chunk))
             cache += self.load_chunk(offset, limit_)
             offset = len(cache)
         return cache
@@ -84,16 +86,20 @@ class ShuffledHitsColumns(ColumnsWithIndexInMemory):
         return len(self.data)
 
 
-__all__ += ['ShuffledHitsColumns']
-
-
 class ShuffledHitsTable(ColumnsWithIndexInMemory):
     def __init__(self, path_table):
-        super().__init__(Shu)
         self.path = path_table
         self.file = open_file(self.path)
         self.table = self.file.root.data
+        super().__init__(self.get_dataclass())
         self.data = self.load_all()
+
+    def get_dataclass(self):
+        if self.table[0]['hits'].shape[1] == 4:
+            return ShuffledHits
+        elif self.table[0]['hits'].shape[1] == 8:
+            return ShuffledCoincidenceHits
+        raise ValueError()
 
     def load_all(self):
         print('Loading data...')
@@ -113,15 +119,11 @@ class ShuffledHitsTable(ColumnsWithIndexInMemory):
     def padding_size(self):
         return self.table[0]['hits'].shape[0]
 
-    def __getitem__(self, i):
-        return self.data[i]
-
-    def __iter__(self):
-        return iter(self.data)
-
     def close(self):
         self.file.close()
 
+
+__all__ += ['ShuffledHitsColumns', 'ShuffledHitsTable']
 
 # class ShuffledHitsNPZColumns(ColumnsWithIndex):
 #     def __init__(self, path_npz):

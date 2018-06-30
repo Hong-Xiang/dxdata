@@ -112,8 +112,8 @@ class PyTableMaker:
 
     def make(self, raw_dataclass_iterator: Iterator[NamedTuple], converter=None):
         h5file = open_file(self.path, mode="w")
-        group = h5file.create_group("/", "photon_hits")
-        table = h5file.create_table(group, "simluated", self.dataclass)
+        table = h5file.create_table("/", "data", self.dataclass)
+        # table = h5file.create_table(group, "simluated", self.dataclass)
         if converter is None:
             converter = self.default_converter
         events = 0

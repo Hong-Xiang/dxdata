@@ -1,4 +1,4 @@
-from tables import IsDescription
+from tables import IsDescription, Float32Col, UInt32Col
 
 
 def pytable_hit_class(padding_size, is_coincidence):

@@ -44,21 +44,16 @@ def db(scanner, coincidence, hits, target):
 @click.option('--padding-size', '-s', type=int, default=5,
               help='Padding size for hits of one photon. Photon with more hits than padding-size would be dropped.')
 @click.option('--true-position', is_flag=True, help='Use true xyz of hit instead of center of crystal')
-def table(path_db, path_table, true_position, padding_size):
-    from ..table import make_table
+@click.option('--limit', '-l', type=int, help='Number of samples to convert.')
+@click.option('--chunk', '-c', type=int, help='Database load chunk size.')
+@click.option('--coincidence', is_flag=True, help='Convert conincidence instead of photons')
+def table(path_db, path_table, true_position, padding_size, limit, coincidence, chunk):
+    """
+    Generate HDF5(PyTables) from database
+    """
+    from ..io.make_table import make_table
     from ..function import sort_hits_by_energy
-    make_table(path_db, path_table, not true_position,
-               padding_size, sort_hits_by_energy)
-
-
-@make.command()
-def test():
-    from dxl.data.zoo.incident_position_estimation.data import PhotonColumns, CoincidenceColumns
-    from dxl.data.zoo.incident_position_estimation.function.on_columns import raw_columns2shuffled_hits_columns
-    from dxl.data.zoo.incident_position_estimation.function import sort_hits_by_energy, coincidence2shuffled_hits
-    from dxl.data.zoo.incident_position_estimation.database import nb
-    path_db = '/mnt/gluster/hongxwing/Workspace/IncidentEstimation/data/gamma.db'
-    limit, chunk = 1000, 1000
-    cc = CoincidenceColumns(path_db, True, limit, chunk)
-    shuffled_columns = raw_columns2shuffled_hits_columns(
-        cc, 5, sort_hits_by_energy)
+    added = make_table(path_db, path_table, not true_position,
+                       coincidence, padding_size,
+                       sort_hits_by_energy, limit, chunk)
+    click.echo("Added {} samples.".format(added))
