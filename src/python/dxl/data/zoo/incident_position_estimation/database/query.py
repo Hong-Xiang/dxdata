@@ -4,11 +4,9 @@ from types import SimpleNamespace
 
 import click
 import numpy as np
-from sqlalchemy.orm import joinedload, subqueryload, selectinload
+from sqlalchemy.orm import joinedload, selectinload, subqueryload
 
 from dxl.data.database.engine import session_factory, session_scope
-from dxl.data.function import function
-from tqdm import tqdm
 
 from .orm import Coincidence, Crystal, Event, Experiment, Hit, Photon
 
@@ -42,11 +40,16 @@ class nb(SimpleNamespace):
     def experiments(cls, path):
         with query_scope(path) as sess:
             return sess.query(Experiment).distinct().count()
+    
+    @classmethod
+    def coincidence(cls, path):
+        with query_scope(path) as sess:
+            return sess.query(Coincidence).count()
 
 
 class chunked(SimpleNamespace):
     @classmethod
-    def chunked_query(cls, q, func, limit, offset):
+    def chunked_query(cls, q, func, limit=None, offset=None):
         if offset is not None:
             q = q.offset(offset)
         if limit is not None:
@@ -54,7 +57,7 @@ class chunked(SimpleNamespace):
         return func(q.all())
 
     @classmethod
-    def photon_hits(cls, path, func, limit=None, offset=None):
+    def photon(cls, path, func, limit=None, offset=None):
         with query_scope(path) as sess:
             q = sess.query(Photon).options(subqueryload(Photon.hits))
             return cls.chunked_query(q, func, limit, offset)

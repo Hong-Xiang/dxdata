@@ -45,9 +45,5 @@ class processings(SimpleNamespace):
         return NestMapOf(ToPhoton(ToHit(is_crystal_center)))
 
     @classmethod
-    def photon_hits(cls, is_crystal_center=True):
-        return NestMapOf(ToPhoton(ToHit(is_crystal_center)))
-
-    @classmethod
     def coincidence(cls, is_crystal_center=True):
         return NestMapOf(ToCoincidence(ToHit(is_crystal_center)))

@@ -3,20 +3,20 @@ from .basic import TensorTypes, Hit
 import numpy as np
 
 
-class ShuffledHitsWithIndex(NamedTuple, TensorTypes):
-    hits: List[Hit]
-    first_hit_index: np.int32
+# class ShuffledHitsWithIndex(NamedTuple, TensorTypes):
+#     hits: List[Hit]
+#     first_hit_index: np.int32
 
-    @classmethod
-    def shapes(cls):
-        return {'hits': [None, 4], 'first_hit_index': []}
+#     @classmethod
+#     def shapes(cls):
+#         return {'hits': [None, 4], 'first_hit_index': []}
 
-    @classmethod
-    def dtypes(cls):
-        return {'hits': np.float32, 'first_hit_index': np.int32}
+#     @classmethod
+#     def dtypes(cls):
+#         return {'hits': np.float32, 'first_hit_index': np.int32}
 
 
-class ShuffledHitsWithIndexAndPaddedSize(NamedTuple, TensorTypes):
+class ShuffledHits(NamedTuple, TensorTypes):
     hits: List[Hit]
     first_hit_index: np.int32
     padded_size: np.int32
@@ -30,4 +30,18 @@ class ShuffledHitsWithIndexAndPaddedSize(NamedTuple, TensorTypes):
         return {'hits': np.float32, 'first_hit_index': np.int32, 'padded_size': np.int32}
 
 
-__all__ = ['ShuffledHitsWithIndex', 'ShuffledHitsWithIndexAndPaddedSize']
+class ShuffledCoincidenceHits(NamedTuple, TensorTypes):
+    hits: List[Hit]
+    first_hit_index: np.int32
+    padded_size: np.int32
+
+    @classmethod
+    def shapes(cls):
+        return {'hits': [None, 8], 'first_hit_index': [], 'padded_size': []}
+
+    @classmethod
+    def dtypes(cls):
+        return {'hits': np.float32, 'first_hit_index': np.int32, 'padded_size': np.int32}
+
+
+__all__ = ['ShuffledHits', 'ShuffledCoincidenceHits']

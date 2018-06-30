@@ -14,7 +14,7 @@ from dxl.data.function import (Function, function, GetAttr, NestMapOf,
 
 # TODO: Use NamedTuple, mingrating to data class in 3.7
 
-__all__ = ['Hit', 'HitWithCrystalCenter', 'Photon', 'Coincidence']
+__all__ = ['Hit', 'Photon', 'Coincidence']
 
 
 class TensorTypes:
@@ -40,10 +40,6 @@ class Hit(NamedTuple, TensorTypes):
     @classmethod
     def shapes(cls):
         return {k: [] for k in cls.dtypes}
-
-
-class HitWithCrystalCenter(Hit):
-    pass
 
 
 class Photon(NamedTuple):

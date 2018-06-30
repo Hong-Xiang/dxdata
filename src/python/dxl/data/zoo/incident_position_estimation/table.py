@@ -48,13 +48,6 @@ def generate_pytable(sess, path_db, hit_dataclass, padding_size, shuffle):
     return it()
 
 
-def pytable_hits_class(padding_size):
-    class Hits(IsDescription):
-        hits = Float32Col([padding_size, 4])
-        first_hit_index = UInt32Col()
-        padded_size = UInt32Col()
-    return Hits
-
 
 dropped = 0
 
