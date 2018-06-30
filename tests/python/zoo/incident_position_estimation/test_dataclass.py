@@ -1,4 +1,4 @@
-from dxl.data.zoo.incident_position_estimation.dataclass import *
+from dxl.data.zoo.incident_position_estimation.data import *
 from dxl.data.function import (Take, OnIterator, To, head,
                                NestMapOf, AllIsInstance, GetAttr,
                                MapWithUnpackArgsKwargs)
@@ -9,7 +9,7 @@ import numpy as np
 
 @pytest.fixture
 def photon_columns(path_of_db):
-    return PhotonColumns(path_of_db, Hit)
+    return PhotonColumns(path_of_db, False, 1000, 1000)
 
 
 @pytest.fixture

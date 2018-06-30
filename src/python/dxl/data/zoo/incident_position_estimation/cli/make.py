@@ -1,10 +1,12 @@
 import click
 import json
 
+from dxl.core.debug import enter_debug
+
 
 @click.group()
 def make():
-    pass
+    enter_debug()
 
 
 @make.command()
@@ -47,3 +49,16 @@ def table(path_db, path_table, true_position, padding_size):
     from ..function import sort_hits_by_energy
     make_table(path_db, path_table, not true_position,
                padding_size, sort_hits_by_energy)
+
+
+@make.command()
+def test():
+    from dxl.data.zoo.incident_position_estimation.data import PhotonColumns, CoincidenceColumns
+    from dxl.data.zoo.incident_position_estimation.function.on_columns import raw_columns2shuffled_hits_columns
+    from dxl.data.zoo.incident_position_estimation.function import sort_hits_by_energy, coincidence2shuffled_hits
+    from dxl.data.zoo.incident_position_estimation.database import nb
+    path_db = '/mnt/gluster/hongxwing/Workspace/IncidentEstimation/data/gamma.db'
+    limit, chunk = 1000, 1000
+    cc = CoincidenceColumns(path_db, True, limit, chunk)
+    shuffled_columns = raw_columns2shuffled_hits_columns(
+        cc, 5, sort_hits_by_energy)

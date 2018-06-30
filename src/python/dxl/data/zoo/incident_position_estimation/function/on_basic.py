@@ -1,6 +1,7 @@
 from dxl.data.function import (Function, function, x, MapByPosition,
                                MapWithUnpackArgsKwargs, To, Padding,
-                               Swap, append, NestMapOf, concatenate)
+                               Swap, append, NestMapOf, concatenate,
+                               Filter)
 import numpy as np
 import random
 
