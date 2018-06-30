@@ -93,6 +93,7 @@ class ShuffledHitsTable(ColumnsWithIndexInMemory):
         self.table = self.file.root.data
         super().__init__(self.get_dataclass())
         self.data = self.load_all()
+        self.file.close()
 
     def get_dataclass(self):
         if self.table[0]['hits'].shape[1] == 4:
@@ -117,7 +118,7 @@ class ShuffledHitsTable(ColumnsWithIndexInMemory):
 
     @property
     def padding_size(self):
-        return self.table[0]['hits'].shape[0]
+        return self.data[0].hits.shape[0]
 
     def close(self):
         self.file.close()
