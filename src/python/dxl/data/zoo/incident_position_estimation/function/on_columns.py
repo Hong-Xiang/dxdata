@@ -3,7 +3,8 @@ from .on_basic import photon2shuffled_hits, coincidence2shuffled_hits
 from ..data import (ShuffledHits, ShuffledCoincidenceHits, PhotonColumns, CoincidenceColumns,
                     ShuffledHitsColumns)
 
-__all__ = ['raw_columns2shuffled_hits_columns']
+__all__ = ['raw_columns2shuffled_hits_columns',
+           'filter_by_nb_hits', 'drop_padded_hits']
 
 
 def _photon_filter(padding_size):
@@ -39,6 +40,22 @@ def raw_columns2shuffled_hits_columns(raw_columns, padding_size, shuffle):
         list(process(raw_columns))
     )
 
+
+def filter_by_nb_hits(source_columns, nb_hits):
+    return ShuffledHitsColumns(
+        source_columns.dataclass,
+        list(Filter(lambda h: h.hits.shape[0] -
+                    h.padded_size == nb_hits)(source_columns))
+    )
+
+
+def drop_padded_hits(source_columns, nb_hits):
+    return ShuffledHitsColumns(
+        source_columns.dataclass,
+        list(OnIterator(lambda x: ShuffledHits(x.hits[:nb_hits, :],
+                                               x.first_hit_index,
+                                               x.padded_size))(source_columns.data))
+    )
 
 # def photon_columns2shuffled_hits_columns(photon_columns, padding_size, shuffle):
 #     process = OnIterator(photon2shuffled_hits(padding_size, shuffle))

@@ -48,3 +48,18 @@ class ColumnsWithIndex(Columns):
             for i in range(self.capacity):
                 yield self.__getitem__(i)
         return it()
+
+
+class ColumnsInMemory(ColumnsWithIndex):
+    def __init__(self, data, dataclass=None):
+        from dxl.data.function import head
+        if dataclass is None:
+            dataclass = type(head(data))
+        super().__init__(dataclass)
+        self.data = data
+
+    def __iter__(self):
+        return iter(self.data)
+
+    def __getitem__(self, i):
+        return self.data[i]
