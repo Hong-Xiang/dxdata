@@ -103,3 +103,8 @@ ENV/
 None
 
 .share
+
+# vs
+dxl.pyproj
+dxl.sln
+.vs/

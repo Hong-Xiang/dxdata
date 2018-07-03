@@ -1,6 +1,6 @@
 import pytest
 from pathlib import Path
-from dxl.data.zoo.incident_position_estimation.crystal import ScannerSpec
+from dxl.data.zoo.incident_position_estimation.database.crystal import ScannerSpec
 import json
 
 
@@ -29,5 +29,3 @@ def spec_of_block8_data():
 def scanner_spec(spec_of_block8_data):
     with open(spec_of_block8_data['scanner_json'], 'r') as fin:
         return ScannerSpec(**json.load(fin))
-
-

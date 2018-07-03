@@ -28,7 +28,7 @@ class ScannerSpec:
     @property
     def nb_detectors_per_block(self):
         return self.nb_detectors_per_ring // self.nb_blocks * self.nb_rings
-    
+
     @property
     def nb_detectors(self):
         return self.nb_detectors_per_ring * self.nb_rings
@@ -40,6 +40,10 @@ class ScannerSpec:
 
 
 class CrystalID1:
+    """
+    Unified crystal id.
+    """
+
     def __init__(self, id):
         self.id = id
 
@@ -61,6 +65,10 @@ class CrystalID1:
 
 
 class CrystalID2:
+    """
+    Crystal by (crystalid, blockid)
+    """
+
     def __init__(self, crystal_id, block_id):
         self.crystal_id = crystal_id
         self.block_id = block_id
@@ -87,6 +95,10 @@ class CrystalID2:
 
 
 class CrystalID3:
+    """
+    Crystal id by (blockid, x level, y level)
+    """
+
     def __init__(self, x, y, z):
         self.x = x
         self.y = y

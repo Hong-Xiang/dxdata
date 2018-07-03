@@ -20,3 +20,21 @@ def test_wrapped_function(call_spy):
     assert call_spy.nb_called == 0
     f()
     assert call_spy.nb_called == 1
+
+
+def test_on_iterator():
+    add = lambda x, v: x + v
+
+    def gen():
+        for i in range(10):
+            yield i
+
+    add_to_iterator = OnIterator(add)
+
+    it = add_to_iterator(gen(), 5)
+
+    results = [x for x in it]
+    assert results == list(range(5, 15))
+
+
+

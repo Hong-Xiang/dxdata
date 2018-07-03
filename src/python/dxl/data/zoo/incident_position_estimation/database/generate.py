@@ -287,16 +287,3 @@ class DatabaseGenerator:
 
     def flush(self):
         self.session.flush()
-
-
-# def generate_database(scanner_json, coincidence_csv, hits_csv, target):
-#     generator = DatabaseGenerator(scanner_json, coincidence_csv, hits_csv, target)
-#     s = DataSpec(hits_csv, coincidence_csv, target)
-#     hits_data, coincidences_data = load_data(s)
-#     make_session(target)
-#     make_experiment(s)
-#     process_rows(hits_data)
-#     flush()
-#     make_coincidences(coincidences_data)
-#     commit()
-#     Processing.session.close()
