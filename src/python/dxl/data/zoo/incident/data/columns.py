@@ -48,9 +48,9 @@ class ShuffledHitsTable(ColumnsWithIndexInMemory):
 
     def get_dataclass(self):
         if self.table[0]['hits'].shape[1] == 4:
-            return ShuffledHits
+            return Photon
         elif self.table[0]['hits'].shape[1] == 8:
-            return ShuffledCoincidenceHits
+            return Coincidence
         raise ValueError()
 
     def load_all(self):
