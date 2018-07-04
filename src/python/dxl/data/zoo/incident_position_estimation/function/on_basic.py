@@ -6,28 +6,29 @@ import numpy as np
 import random
 
 from typing import List
-from ..data import Hit, ShuffledHits, ShuffledCoincidenceHits
+from ..data import Hit, ShuffledHits, ShuffledCoincidenceHits, Photon, Coincidence
 
 
 class ShuffleHits(Function):
-    def make_result(self, hits, order):
-        first_index = order.index(0)
-        return type(hits)([hits[i] for i in order]), first_index
+    def __call__(self, photon: Photon):
+        hits = photon.hits
+        order = self.order(hits)
+        return photon.update(hits=[hits[i] for i in order], first_hit_index=order.index(0))
 
 
 class RandomShuffleHits(ShuffleHits):
-    def __call__(self, hits):
+    def order(self, hits):
         order = list(range(len(hits)))
         random.shuffle(order)
-        return self.make_result(hits, order)
+        return order
 
 
 random_shuffle_hits = RandomShuffleHits()
 
 
 class JustAddIndex(ShuffleHits):
-    def __call__(self, hits):
-        return self.make_result(hits, list(range(len(hits))))
+    def order(self, hits):
+        return list(range(len(hits)))
 
 
 just_add_index = JustAddIndex()
@@ -37,13 +38,27 @@ class SortHitsByEnergy(ShuffleHits):
     def __call__(self, hits):
         energy = np.array([h.e for h in hits])
         order = list(np.argsort(energy))
-        return self.make_result(hits, order)
+        return order
 
 
 sort_hits_by_energy = SortHitsByEnergy()
 
 
 __all__ = ['random_shuffle_hits', 'just_add_index', 'sort_hits_by_energy']
+
+
+class PaddingPhoton(Function):
+    def __init__(self, padding_size):
+        self.padding = Padding(padding_size, is_with_padded_size=False)
+
+    def __call__(self, p: Photon):
+        return p.update(hits=self.padding(p.hits),
+                        nb_true_hits=len(p.hits))
+
+
+@function
+def shuffle_photon(c: Coincidence):
+    return Coincidence([c.snd, c.fst] + c.photons[2:])
 
 
 def photon2shuffled_hits(padding_size: int, shuffle: ShuffledHits):

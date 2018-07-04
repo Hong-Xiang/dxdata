@@ -21,6 +21,28 @@ def _coincidence_filter(padding_size):
     return f
 
 
+from functools import singledispatch
+
+
+class ShuffleHits(Function):
+    def __init__(self, method):
+        self.method = method
+
+    def __call__(self, columns):
+        return _shuffle_hits(columns, shuffle)
+
+
+@singledispatch
+def _shuffle_hits(c, shuffle):
+    raise TypeError("Unsupported column {}.".format(type(c)))
+
+@_shuffle_hits.register(PhotonColumns)
+def _(c, shuffle):
+    for h in c.hits:
+        
+
+
+
 def raw_columns2shuffled_hits_columns(raw_columns, padding_size, shuffle):
     processings = {
         PhotonColumns: photon2shuffled_hits,
