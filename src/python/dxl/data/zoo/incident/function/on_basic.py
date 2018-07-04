@@ -1,7 +1,4 @@
-from dxl.data.function import (Function, function, x, MapByPosition,
-                               MapWithUnpackArgsKwargs, To, Padding,
-                               Swap, append, NestMapOf, concatenate,
-                               Filter)
+from dxl.data.function import (Function, function)
 import numpy as np
 import random
 
@@ -44,15 +41,17 @@ class SortHitsByEnergy(ShuffleHits):
 sort_hits_by_energy = SortHitsByEnergy()
 
 
-__all__ = ['random_shuffle_hits', 'just_add_index', 'sort_hits_by_energy']
-
-
 class PaddingPhoton(Function):
     def __init__(self, padding_size):
-        self.padding = Padding(padding_size, is_with_padded_size=False)
+        self.padded_size = padding_size
 
     def __call__(self, p: Photon):
-        return p.update(hits=self.padding(p.hits),
+        if len(p.hits) > self.padded_size:
+            return p.update()
+        hits = [h for h in p.hits]
+        hits += [p.hits[0].update(e=0.0)
+                 for _ in range(self.padded_size - len(p.hits))]
+        return p.update(hits=hits,
                         nb_true_hits=len(p.hits))
 
 
@@ -60,6 +59,9 @@ class PaddingPhoton(Function):
 def swap_photon(c: Coincidence):
     return Coincidence([c.snd, c.fst] + c.photons[2:])
 
+
+__all__ = ['random_shuffle_hits', 'just_add_index',
+           'sort_hits_by_energy', 'PaddingPhoton', 'swap_photon']
 
 # def photon2shuffled_hits(padding_size: int, shuffle: ShuffledHits):
 #     return (x.hits

@@ -1,6 +1,5 @@
-from dxl.data.zoo.incident.data import *
-from dxl.data.zoo.incident.function import (
-    random_shuffle_hits, just_add_index, sort_hits_by_energy)
+from dxl.data.zoo.incident.data import Hit, Photon, Coincidence
+from dxl.data.zoo.incident.function.on_basic import *
 
 from dxl.data.function import mono_increase, x
 
@@ -33,3 +32,10 @@ def test_sort_hits_by_energy(photon):
     assert len(p.hits) == 3
     assert p.first_hit_index == 0
     assert mono_increase(list(map(x.e, p.hits)))
+
+
+def test_padding_photon(photon):
+    p = PaddingPhoton(5)(photon)
+    assert p is not photon
+    assert len(photon.hits) == 3
+    assert len(p.hits) == 5
