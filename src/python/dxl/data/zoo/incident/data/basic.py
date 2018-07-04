@@ -15,15 +15,17 @@ class TensorTypes:
         raise NotImplementedError
 
 
-def _formatter_with_none_support(o, fields):
-    result = "<{}(".format(o.__class__)
+def _formatter_with_none_support(typename, o, fields):
+    result = "<{}(".format(typename)
+    with_prev = False
     for i, n in enumerate(fields):
         value = getattr(o, n)
         if value is None:
             continue
-        result += "{}={}".format(o, value)
-        if i < len(fields) - 1:
+        if with_prev:
             result += ", "
+        result += "{}={}".format(n, value)
+        with_prev = True
     result += ")>"
     return result
 
@@ -48,7 +50,7 @@ class Hit:
             result['crystal_index'] = []
 
     def __repr__(self):
-        return _formatter_with_none_support(self, ['x', 'y', 'z', 'e', 'crystal_index'])
+        return _formatter_with_none_support('Hit', self, ['x', 'y', 'z', 'e', 'crystal_index'])
 
     def update(self, x=..., y=..., z=..., e=..., crystal_index=...):
         return Hit(
@@ -67,7 +69,7 @@ class Photon:
         self.nb_true_hits = nb_true_hits
 
     def __repr__(self):
-        return _formatter_with_none_support(self, ['hits', 'first_hit_index', 'nb_true_hits'])
+        return _formatter_with_none_support('Photon', self, ['hits', 'first_hit_index', 'nb_true_hits'])
 
     def update(self, hits=..., first_hit_index=..., nb_true_hits=...):
         return Photon(
@@ -90,4 +92,4 @@ class Coincidence:
         return self.photons[1]
 
     def __repr__(self):
-        return "<{}(photons={})>".format(self.__class__, self.photons)
+        return "<Coincidence(photons={})>".format(self.photons)
