@@ -39,3 +39,10 @@ def test_padding_photon(photon):
     assert p is not photon
     assert len(photon.hits) == 3
     assert len(p.hits) == 5
+
+
+def test_swap_photon(coincidence):
+    c = swap_photon(coincidence)
+    assert c is not coincidence
+    assert c.photons[0] is coincidence.photons[1]
+    assert c.photons[1] is coincidence.photons[0]
