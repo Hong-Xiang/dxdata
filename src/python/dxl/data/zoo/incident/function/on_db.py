@@ -72,9 +72,9 @@ def database_load_all(loader, query_spec: QuerySpec, feautre_spec: FeatureSpec):
     offset = query_spec.offset if query_spec.offset is not None else 0
     cache = []
     if query_spec.limit is None:
-        if loader == load.photon:
+        if loader == database_loader.photon:
             total = nb.photon(query_spec.path)
-        elif loader == load.coincidence:
+        elif loader == database_loader.coincidence:
             total = nb.coincidence(query_spec.path)
         else:
             raise ValueError(

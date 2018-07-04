@@ -8,7 +8,8 @@ from ..data import PhotonColumns, CoincidenceColumns
 # __all__ = ['raw_columns2shuffled_hits_columns',
 #    'filter_by_nb_hits', 'drop_padded_hits']
 
-__all__ = ['FilterPhotonByNbHits', 'FilterCoincidenceByNbHits']
+__all__ = ['FilterPhotonByNbHits', 'FilterCoincidenceByNbHits',
+           'FilterCoincidenceByNbPhoton']
 
 
 # def _photon_filter(padding_size):
@@ -72,6 +73,13 @@ class FilterCoincidenceByNbHits(Function):
         return CoincidenceColumns([c for c in columns.data
                                    if len(c.photons[self.index_of_photon].hits) == self.nb_hits])
 
+
+class FilterCoincidenceByNbPhoton(Function):
+    def __init__(self, nb_photons=2):
+        self.nb_photons = nb_photons
+
+    def __call__(self, columns: CoincidenceColumns):
+        return CoincidenceColumns([c for c in columns.data if len(c.photons) == self.nb_photons])
 
 # def raw_columns2shuffled_hits_columns(raw_columns, padding_size, shuffle):
 #     processings = {

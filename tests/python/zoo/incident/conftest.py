@@ -12,6 +12,10 @@ def path_resource():
 def path_of_db(path_resource):
     return path_resource / 'data' / 'gamma.db'
 
+@pytest.fixture(scope='module')
+def query_spec(path_of_db):
+    from dxl.data.zoo.incident.data import QuerySpec
+    return QuerySpec(path_of_db, None, 1000, 0)
 
 @pytest.fixture(scope='module')
 def spec_of_block8_data():

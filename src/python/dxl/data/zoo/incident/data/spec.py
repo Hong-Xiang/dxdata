@@ -4,16 +4,24 @@ from pathlib import Path
 __all__ = ['QuerySpec', 'FeatureSpec']
 
 
-class QuerySpec(NamedTuple):
-    path: Path
-    limit: Optional[int]
-    chunk: Optional[int]
-    offset: Optional[int]
+class QuerySpec:
+    def __init__(self, path, limit=None, chunk=None, offset=0):
+        self.path = path
+        self.limit = limit
+        self.chunk = chunk
+        self.offset = offset
 
 
-class FeatureSpec(NamedTuple):
-    main_feature: str
-    is_crystal_center: bool
-    is_crystal_index: bool
-    is_padding: bool
-    shuffle: str
+class FeatureSpec:
+    def __init__(self, main_feature=None, is_crystal_center=True,
+                 is_crystal_index=None, is_padding=None, shuffle=None):
+        self.main_feature = main_feature
+        self.is_crystal_center = is_crystal_center
+        self.is_crystal_index = is_crystal_center
+        self.is_padding = is_padding
+        self.shuffle = shuffle
+
+    @property
+    def _fields(self):
+        return ('main_feature', 'is_crystal_center', 'is_crystal_index',
+                'is_padding', 'shuffle')

@@ -49,6 +49,16 @@ class Hit:
         if self.crystal_index is not None:
             result['crystal_index'] = []
 
+    @property
+    def _fields(self):
+        result = ['x', 'y', 'z', 'y', 'e']
+        if self.crystal_index is not None:
+            result.append('crystal_index')
+        return tuple(result)
+    
+    def __getitem__(self, index):
+        return [self.x, self.y, self.z, self.e, self.crystal_index][index]
+
     def __repr__(self):
         return _formatter_with_none_support('Hit', self, ['x', 'y', 'z', 'e', 'crystal_index'])
 
@@ -68,6 +78,15 @@ class Photon:
         self.first_hit_index = first_hit_index
         self.nb_true_hits = nb_true_hits
 
+    @property
+    def _fields(self):
+        result = ['hits']
+        if self.first_hit_index is not None:
+            result.append('first_hit_index')
+        if self.nb_true_hits is not None:
+            result.append('nb_true_hits')
+        return tuple(result)
+
     def __repr__(self):
         return _formatter_with_none_support('Photon', self, ['hits', 'first_hit_index', 'nb_true_hits'])
 
@@ -77,6 +96,9 @@ class Photon:
             first_hit_index if first_hit_index is not ... else self.first_hit_index,
             nb_true_hits if nb_true_hits is not ... else self.nb_true_hits
         )
+    
+    def __getitem__(self, index):
+        return [self.hits, self.first_hit_index, self.nb_true_hits][index]
 
 
 class Coincidence:
@@ -93,3 +115,10 @@ class Coincidence:
 
     def __repr__(self):
         return "<Coincidence(photons={})>".format(self.photons)
+
+    @property
+    def _fields(self):
+        return ('photons',)
+
+    def __getitem__(self, index):
+        return [self.photons][index]
