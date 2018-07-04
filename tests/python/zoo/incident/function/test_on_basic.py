@@ -1,5 +1,5 @@
-from dxl.data.zoo.incident_position_estimation.data import *
-from dxl.data.zoo.incident_position_estimation.function import (coincidence2shuffled_hits,
+from dxl.data.zoo.incident.data import *
+from dxl.data.zoo.incident.function import (coincidence2shuffled_hits,
                                                                 sort_hits_by_energy, photon2shuffled_hits)
 
 import pytest

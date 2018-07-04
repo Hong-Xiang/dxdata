@@ -1,4 +1,4 @@
-from dxl.data.zoo.incident_position_estimation import (
+from dxl.data.zoo.incident import (
     CrystalID1, CrystalID2, CrystalID3, ScannerSpec, Crystal, CrystalFactory)
 from dxl.shape import Vector3
 import pytest

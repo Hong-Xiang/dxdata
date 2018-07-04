@@ -22,7 +22,7 @@ import hashlib
 
 enter_debug()
 
-logger = Logger('incident_position_estimation')
+logger = Logger('incident')
 set_logging_info_level_with_default_format()
 
 NB_CHUNK = 1000
@@ -195,8 +195,12 @@ class Hits:
     @logger.before.info('Processing rows...')
     @logger.after.info('Process row done.')
     def process_all(self, session, hits_data, experiment, events, photons,
-                    crystals):
-        for i in tqdm(range(hits_data.shape[0]), ascii=True):
+                    crystals, nb_max_hits=None):
+        if nb_max_hits is None:
+            nb_max_hits = hits_data.shape[0]
+        else:
+            nb_max_hits = min(hits_data.shape[0], nb_max_hits)
+        for i in tqdm(range(nb_max_hits), ascii=True):
             self.process_row(session, hits_data.iloc[i], events, photons,
                              crystals, experiment)
         session.flush()
@@ -205,11 +209,12 @@ class Hits:
 class Coincidences:
     @auto_flush()
     def make(self, session, row, events, experiment):
+        e0, e1 = events.get(int(row['eventID1'])), events.get(
+            int(row['eventID2']))
+        if e0 is None or e1 is None:
+            return None
         c = Coincidence(
-            events=[
-                events.get(int(row['eventID1'])),
-                events.get(int(row['eventID2']))
-            ],
+            events=[e0, e1],
             type=(int(row['type(0:scatter-1:random-2:true)'])),
             experiment=experiment)
         session.add(c)
@@ -217,8 +222,13 @@ class Coincidences:
 
     @logger.before.info('Processing conincidences...')
     @logger.after.info('Done.')
-    def process_all(self, session, conincidence_data, experiment, events):
-        for i in tqdm(range(conincidence_data.shape[0]), ascii=True):
+    def process_all(self, session, conincidence_data, experiment, events, nb_max_coincidence=None):
+        if nb_max_coincidence is None:
+            nb_max_coincidence = conincidence_data.shape[0]
+        else:
+            nb_max_coincidence = min(
+                conincidence_data.shape[0], nb_max_coincidence)
+        for i in tqdm(range(nb_max_coincidence), ascii=True):
             self.make(session, conincidence_data.iloc[i], events, experiment)
         session.flush()
 
@@ -243,7 +253,7 @@ class DataSpec:
 
 
 class DatabaseGenerator:
-    def __init__(self, data_spec: DataSpec):
+    def __init__(self, data_spec: DataSpec, nb_max_hits=None, nb_max_coincidence=None):
         self.spec = data_spec
         self.experiments = Experiments()
         self.crystals = Crystals()
@@ -251,6 +261,8 @@ class DatabaseGenerator:
         self.events = Events()
         self.photons = Photons()
         self.coincidences = Coincidences()
+        self.nb_max_hits = nb_max_hits
+        self.nb_max_coincidence = nb_max_coincidence
 
     @logger.before.info('Loading data...')
     @logger.after.info('Loading data done.')
@@ -271,9 +283,9 @@ class DatabaseGenerator:
         self.crystals.set_spec(scanner_spec)
         self.crystals.process_all(session, scanner_spec, experiment)
         self.hits.process_all(session, hits_data, experiment, self.events,
-                              self.photons, self.crystals)
+                              self.photons, self.crystals, self.nb_max_hits)
         self.coincidences.process_all(session, coincidence_data, experiment,
-                                      self.events)
+                                      self.events, self.nb_max_coincidence)
         self.commit()
 
     def make_session(self):
