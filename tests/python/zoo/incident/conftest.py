@@ -18,13 +18,12 @@ def query_spec(path_of_db):
     return QuerySpec(path_of_db, None, 1000, 0)
 
 @pytest.fixture(scope='module')
-def spec_of_block8_data():
-    root = Path(
-        '/mnt/gluster/CustomerTests/IncidentEstimation/SQLAlchemyDemo/simu0.1')
+def spec_of_block8_data(path_resource):
+    root = path_resource / 'data'
     return {
         'scanner_json': root / 'scanner.json',
-        'hits_csv': root / 'hitsM.csv',
-        'coincidences_csv': root / 'true_scatter_randomM.csv'
+        'hits_csv': root / 'hits.csv',
+        'coincidences_csv': root / 'coincidence.csv'
     }
 
 

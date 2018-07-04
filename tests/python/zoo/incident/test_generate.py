@@ -1,4 +1,4 @@
-from dxl.data.zoo.incident.generate import (
+from dxl.data.zoo.incident.database.generate import (
     auto_flush, NB_CHUNK, Crystals, DatabaseGenerator, DataSpec)
 
 import pytest
