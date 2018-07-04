@@ -1,1 +1,1 @@
-from .query import nb, chunked
+from .query import nb, chunked, single

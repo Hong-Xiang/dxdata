@@ -6,7 +6,7 @@ from types import SimpleNamespace
 from typing import List
 
 __all__ = ['ToHit', 'ToPhoton', 'ToCoincidence',
-           'processings', 'load', 'load_all']
+           'processings', 'database_loader', 'database_load_all']
 
 
 class ToHit(Function):
@@ -23,16 +23,16 @@ class ToHit(Function):
 
 
 class ToPhoton(Function):
-    def __init__(self, spec: FeatureSpec):
-        self.to_hit = ToHit(spec)
+    def __init__(self, to_hit: ToHit):
+        self.to_hit = to_hit
 
     def __call__(self, p: orm.Photon) -> Photon:
         return Photon([self.to_hit(h) for h in p.hits])
 
 
 class ToCoincidence(Function):
-    def __init__(self, spec: FeatureSpec):
-        self.to_photon = ToPhoton(spec)
+    def __init__(self, to_photon: ToPhoton):
+        self.to_photon = to_photon
 
     def __call__(self, c: orm.Coincidence) -> Coincidence:
         photons = []
@@ -49,10 +49,10 @@ class processings(SimpleNamespace):
 
     @classmethod
     def coincidence(cls, spec: FeatureSpec):
-        return NestMapOf(ToCoincidence(ToHit(spec)))
+        return NestMapOf(ToCoincidence(ToPhoton(ToHit(spec))))
 
 
-class load(SimpleNamespace):
+class database_loader(SimpleNamespace):
     @classmethod
     def photon(cls, query_sepc: QuerySpec, feature_spec: FeatureSpec):
         return chunked.photon(query_sepc.path,
@@ -68,7 +68,7 @@ class load(SimpleNamespace):
                                    query_sepc.offset)
 
 
-def load_all(loader, query_spec: QuerySpec, feautre_spec: FeatureSpec):
+def database_load_all(loader, query_spec: QuerySpec, feautre_spec: FeatureSpec):
     offset = query_spec.offset if query_spec.offset is not None else 0
     cache = []
     if query_spec.limit is None:
