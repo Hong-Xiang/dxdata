@@ -1,5 +1,6 @@
 from dxl.data import ColumnsWithIndex
-from .basic import Photon, Hit, Coincidence, FeatureSpec
+from .spec import FeatureSpec
+from .basic import Photon, Hit, Coincidence
 from .processed import ShuffledHits, ShuffledCoincidenceHits
 from ..database import nb, chunked
 from dxl.data.core import ColumnsWithIndex
@@ -31,7 +32,7 @@ class PhotonColumns(ColumnsWithIndexInMemory):
         super().__init__(Photon, data)
 
 
-class CoincidenceColumns(RawDataColumns):
+class CoincidenceColumns(ColumnsWithIndexInMemory):
     def __init__(self, data):
         super().__init__(Coincidence, data)
 

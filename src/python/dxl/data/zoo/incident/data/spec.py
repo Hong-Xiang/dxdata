@@ -6,9 +6,9 @@ __all__ = ['QuerySpec', 'FeatureSpec']
 
 class QuerySpec(NamedTuple):
     path: Path
-    limit: Optional(int)
-    chunk: Optional(int)
-    offset: Optional(int)
+    limit: Optional[int]
+    chunk: Optional[int]
+    offset: Optional[int]
 
 
 class FeatureSpec(NamedTuple):
