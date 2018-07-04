@@ -35,7 +35,7 @@ just_add_index = JustAddIndex()
 
 
 class SortHitsByEnergy(ShuffleHits):
-    def __call__(self, hits):
+    def order(self, hits):
         energy = np.array([h.e for h in hits])
         order = list(np.argsort(energy))
         return order
@@ -57,32 +57,32 @@ class PaddingPhoton(Function):
 
 
 @function
-def shuffle_photon(c: Coincidence):
+def swap_photon(c: Coincidence):
     return Coincidence([c.snd, c.fst] + c.photons[2:])
 
 
-def photon2shuffled_hits(padding_size: int, shuffle: ShuffledHits):
-    return (x.hits
-            >> shuffle
-            >> MapByPosition(0, To(np.array)
-                             >> Padding(padding_size, is_with_padded_size=True))
-            >> MapWithUnpackArgsKwargs(append)
-            >> Swap(1, 2)
-            >> MapWithUnpackArgsKwargs(To(ShuffledHits)))
+# def photon2shuffled_hits(padding_size: int, shuffle: ShuffledHits):
+#     return (x.hits
+#             >> shuffle
+#             >> MapByPosition(0, To(np.array)
+#                              >> Padding(padding_size, is_with_padded_size=True))
+#             >> MapWithUnpackArgsKwargs(append)
+#             >> Swap(1, 2)
+#             >> MapWithUnpackArgsKwargs(To(ShuffledHits)))
 
 
-@function
-def _merge_helper(shuffled_hits_list):
-    sh0, sh1 = shuffled_hits_list
-    hits0, hits1 = sh0.hits, sh1.hits
-    hits = concatenate([hits0, hits1], 1)
-    return ShuffledCoincidenceHits(hits, sh0.first_hit_index, sh0.padded_size)
+# @function
+# def _merge_helper(shuffled_hits_list):
+#     sh0, sh1 = shuffled_hits_list
+#     hits0, hits1 = sh0.hits, sh1.hits
+#     hits = concatenate([hits0, hits1], 1)
+#     return ShuffledCoincidenceHits(hits, sh0.first_hit_index, sh0.padded_size)
 
 
-def coincidence2shuffled_hits(padding_size: int, shuffle: ShuffledHits):
-    return (x.photons
-            >> NestMapOf(photon2shuffled_hits(padding_size, shuffle))
-            >> _merge_helper)
+# def coincidence2shuffled_hits(padding_size: int, shuffle: ShuffledHits):
+#     return (x.photons
+#             >> NestMapOf(photon2shuffled_hits(padding_size, shuffle))
+#             >> _merge_helper)
 
 
-__all__ += ['photon2shuffled_hits', 'coincidence2shuffled_hits']
+# __all__ += ['photon2shuffled_hits', 'coincidence2shuffled_hits']

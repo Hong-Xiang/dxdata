@@ -1,6 +1,7 @@
 from dxl.data.core import function, Function
 
-__all__ = ['is_decay', 'AllIsInstance', 'MapIf', 'Always', 'Filter']
+__all__ = ['is_decay', 'AllIsInstance', 'MapIf',
+           'Always', 'Filter', 'mono_decay', 'mono_increase']
 
 
 @function
@@ -64,3 +65,19 @@ class Filter(Function):
 @function
 def is_none(x):
     return x is None
+
+
+@function
+def mono_decay(x):
+    for p, s in zip(x[:-1], x[1:]):
+        if p < s:
+            return False
+    return True
+
+
+@function
+def mono_increase(x):
+    for p, s in zip(x[:-1], x[1:]):
+        if p > s:
+            return False
+    return True

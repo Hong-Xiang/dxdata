@@ -1,6 +1,8 @@
 from dxl.data.zoo.incident.data import *
-from dxl.data.zoo.incident.function import (coincidence2shuffled_hits,
-                                                                sort_hits_by_energy, photon2shuffled_hits)
+from dxl.data.zoo.incident.function import (
+    random_shuffle_hits, just_add_index, sort_hits_by_energy)
+
+from dxl.data.function import mono_increase, x
 
 import pytest
 
@@ -25,15 +27,9 @@ def coincidence(photon):
     ])
 
 
-def test_photon2shuffled_hits(photon):
-    sh = photon2shuffled_hits(5, sort_hits_by_energy)(photon)
-    assert sh.hits.shape == (5, 4)
-    assert sh.first_hit_index == 0
-    assert sh.padded_size == 2
-
-
-def test_coincidence2shuffled_hits(coincidence):
-    sh = coincidence2shuffled_hits(5, sort_hits_by_energy)(coincidence)
-    assert sh.hits.shape == (5, 8)
-    assert sh.first_hit_index == 0
-    assert sh.padded_size == 2
+def test_sort_hits_by_energy(photon):
+    p = sort_hits_by_energy(photon)
+    assert p is not photon
+    assert len(p.hits) == 3
+    assert p.first_hit_index == 0
+    assert mono_increase(list(map(x.e, p.hits)))
