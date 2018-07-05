@@ -1,4 +1,4 @@
-from dxl.data.zoo.incident_position_estimation.generate import (
+from dxl.data.zoo.incident.database.generate import (
     auto_flush, NB_CHUNK, Crystals, DatabaseGenerator, DataSpec)
 
 import pytest

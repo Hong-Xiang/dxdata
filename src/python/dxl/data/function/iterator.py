@@ -1,5 +1,7 @@
 from dxl.data.function import Function
 
+__all__ = ['SelectPer', 'DropPer', 'ApplyAllOn', 'ApplyWith']
+
 
 class SelectPer(Function):
     def __init__(self, period):
@@ -23,3 +25,19 @@ class DropPer(Function):
                 if i % self.period != 0:
                     yield x
         return it()
+
+
+class ApplyAllOn(Function):
+    def __init__(self, target):
+        self.target = target
+
+    def __call__(self, funcs):
+        return (f(self.target) for f in funcs)
+
+
+class ApplyWith(Function):
+    def __init__(self, funcs):
+        self.funcs = funcs
+
+    def __call__(self, target):
+        return (f(target) for f in self.funcs)

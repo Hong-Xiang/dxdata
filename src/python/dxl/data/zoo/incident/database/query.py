@@ -17,7 +17,7 @@ def query_scope(path):
         yield sess
 
 
-__all__ = ['nb', 'chunked']
+__all__ = ['nb', 'single', 'chunked']
 
 
 class nb(SimpleNamespace):
@@ -46,6 +46,22 @@ class nb(SimpleNamespace):
         with query_scope(path) as sess:
             return sess.query(Coincidence).count()
 
+class single(SimpleNamespace):
+    @classmethod
+    def hit(cls, path, func, offset=0):
+        with query_scope(path) as sess:
+            return func(sess.query(Hit).offset(offset).first())
+    
+    @classmethod
+    def photon(cls, path, func, offset=0):
+        with query_scope(path) as sess:
+            return func(sess.query(Photon).offset(offset).first())
+    
+    @classmethod
+    def coincidence(cls, path, func, offset=0):
+        with query_scope(path) as sess:
+            return func(sess.query(Coincidence).offset(offset).first())
+            
 
 class chunked(SimpleNamespace):
     @classmethod

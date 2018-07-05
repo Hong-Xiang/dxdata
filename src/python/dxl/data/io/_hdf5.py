@@ -110,10 +110,11 @@ class PyTableMaker:
                 reporter.update()
         return it()
 
-    def make(self, raw_dataclass_iterator: Iterator[NamedTuple], converter=None):
+    def make(self, raw_dataclass_iterator: Iterator[NamedTuple], converter=None, table_name=None):
         h5file = open_file(self.path, mode="w")
-        table = h5file.create_table("/", "data", self.dataclass)
-        # table = h5file.create_table(group, "simluated", self.dataclass)
+        if table_name is None:
+            table_name = "data"
+        table = h5file.create_table("/", table_name, self.dataclass)
         if converter is None:
             converter = self.default_converter
         events = 0

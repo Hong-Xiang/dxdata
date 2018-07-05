@@ -23,12 +23,14 @@ def make():
     '-h',
     type=click.types.Path(exists=True, file_okay=True, dir_okay=False))
 @click.option('--target', '-t', type=click.types.Path(exists=False))
-def db(scanner, coincidence, hits, target):
+@click.option('--nb-max-hits', type=int)
+@click.option('--nb-max-coincidence', type=int)
+def db(scanner, coincidence, hits, target, nb_max_hits, nb_max_coincidence):
     """
     Generate database from csv files.
     """
-    from ..generate import DatabaseGenerator, DataSpec
-    generator = DatabaseGenerator(DataSpec(scanner, hits, coincidence, target))
+    from dxl.data.zoo.incident.database.generate import DatabaseGenerator, DataSpec
+    generator = DatabaseGenerator(DataSpec(scanner, hits, coincidence, target), nb_max_hits, nb_max_coincidence)
     generator.generate()
 
 

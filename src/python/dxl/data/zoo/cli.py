@@ -13,7 +13,7 @@ class CLI(click.MultiCommand):
         return sorted(self.commands.keys())
 
     def get_command(self, ctx, name):
-        from .incident_position_estimation.cli import incident
+        from .incident.cli import incident
         if name in self.commands:
             if self.commands[name] is None:
                 mapping = {'incident': incident}

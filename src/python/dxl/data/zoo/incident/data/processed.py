@@ -15,7 +15,6 @@ import numpy as np
 #     def dtypes(cls):
 #         return {'hits': np.float32, 'first_hit_index': np.int32}
 
-
 class ShuffledHits(NamedTuple, TensorTypes):
     hits: List[Hit]
     first_hit_index: np.int32
