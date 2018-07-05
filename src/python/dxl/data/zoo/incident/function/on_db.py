@@ -19,7 +19,7 @@ class ToHit(Function):
         else:
             x, y, z = o.x, o.y, o.z
         cid = o.crystal_id if self.spec.is_crystal_index else None
-        return Hit(o.x, o.y, o.z, o.energy, cid)
+        return Hit(x, y, z, o.energy, cid)
 
 
 class ToPhoton(Function):
