@@ -15,6 +15,8 @@ def columns2pytable(columns, path_table):
 def insert_photon(row, p: Photon, prefix=''):
     row['{}hits'.format(prefix)] = np.array(
         [[h.x, h.y, h.z, h.e] for h in p.hits])
+    if p.hits[0].crystal_index is not None:
+        row['crystal_index'] = [h.crystal_index for h in p.hits]
     if p.first_hit_index is not None:
         row['{}first_hit_index'.format(prefix)] = p.first_hit_index
     if p.nb_true_hits is not None:

@@ -18,14 +18,14 @@ def _(template):
         if template.first_hit_index is not None:
             class Photon(IsDescription):
                 hits = Float32Col([len(template.hits), 4])
-                crystal_index = UInt32Col()
+                crystal_index = UInt32Col([len(template.hits)])
                 first_hit_index = UInt32Col()
                 nb_true_hits = UInt32Col()
             return Photon
         else:
             class Photon(IsDescription):
                 hits = Float32Col([len(template.hits), 4])
-                crystal_index = UInt32Col()
+                crystal_index = UInt32Col([len(template.hits)])
             return Photon
     else:
         if template.first_hit_index is not None:

@@ -5,6 +5,7 @@ import random
 from typing import List
 from ..data import Hit, ShuffledHits, ShuffledCoincidenceHits, Photon, Coincidence
 
+MAX_CRYSTAL_INDEX = 999999
 
 class ShuffleHits(Function):
     def __call__(self, photon: Photon):
@@ -49,7 +50,7 @@ class PaddingPhoton(Function):
         if len(p.hits) > self.padded_size:
             return p.update()
         hits = [h for h in p.hits]
-        hits += [p.hits[0].update(e=0.0)
+        hits += [p.hits[0].update(x=0.0, y=0.0, z=0.0, e=0.0, crystal_index=MAX_CRYSTAL_INDEX)
                  for _ in range(self.padded_size - len(p.hits))]
         return p.update(hits=hits,
                         nb_true_hits=len(p.hits))
