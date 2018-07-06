@@ -3,7 +3,7 @@ from functools import singledispatch
 from pathlib import Path
 from dxl.data.io import PyTableMaker
 import numpy as np
-
+from tables import open_file
 __all__ = ['columns2pytable']
 
 
@@ -16,7 +16,8 @@ def insert_photon(row, p: Photon, prefix=''):
     row['{}hits'.format(prefix)] = np.array(
         [[h.x, h.y, h.z, h.e] for h in p.hits])
     if p.hits[0].crystal_index is not None:
-        row['crystal_index'] = [h.crystal_index for h in p.hits]
+        row['{}crystal_index'.format(prefix)] = [
+            h.crystal_index for h in p.hits]
     if p.first_hit_index is not None:
         row['{}first_hit_index'.format(prefix)] = p.first_hit_index
     if p.nb_true_hits is not None:

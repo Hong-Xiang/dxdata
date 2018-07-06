@@ -43,6 +43,6 @@ def _(template):
 @pytable_class.register(basic.Coincidence)
 def _(template: basic.Coincidence):
     class Coincidence(IsDescription):
-        fst = pytable_class(template.photons[0])
-        snd = pytable_class(template.photons[1])
+        fst = pytable_class(template.fst)
+        snd = pytable_class(template.snd)
     return Coincidence
