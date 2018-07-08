@@ -111,7 +111,7 @@ class PyTableMaker:
         return it()
 
     def make(self, raw_dataclass_iterator: Iterator[NamedTuple], converter=None, table_name=None):
-        h5file = open_file(self.path, mode="w")
+        h5file = open_file(self.path, filters=Filters(5), mode="w")
         if table_name is None:
             table_name = "data"
         table = h5file.create_table("/", table_name, self.dataclass)

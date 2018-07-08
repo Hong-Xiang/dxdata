@@ -23,6 +23,11 @@ def _coincidence_loader(row) -> Coincidence:
 
 
 def _get_loader(table):
+    if isinstance(table, np.ndarray):
+        if 'fst' in table.dtype.fields:
+            return _coincidence_loader
+        else:
+            return _photon_loader
     if table.colnames == ['fst', 'snd']:
         return _coincidence_loader
     else:
@@ -30,8 +35,10 @@ def _get_loader(table):
 
 
 @logger.before.info('Loading pytable data')
-def load_table(path):
+def load_table(path, limit=None):
     with open_file(path) as fin:
         table = fin.root.data
         loader = _get_loader(table)
-        return [loader(table[i]) for i in range(table.nrows)]
+        if limit is None:
+            limit = table.nrows
+        return [loader(table[i]) for i in range(limit)]
