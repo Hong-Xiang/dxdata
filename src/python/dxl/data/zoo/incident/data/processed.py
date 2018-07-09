@@ -3,18 +3,6 @@ from .basic import TensorTypes, Hit
 import numpy as np
 
 
-# class ShuffledHitsWithIndex(NamedTuple, TensorTypes):
-#     hits: List[Hit]
-#     first_hit_index: np.int32
-
-#     @classmethod
-#     def shapes(cls):
-#         return {'hits': [None, 4], 'first_hit_index': []}
-
-#     @classmethod
-#     def dtypes(cls):
-#         return {'hits': np.float32, 'first_hit_index': np.int32}
-
 class ShuffledHits(NamedTuple, TensorTypes):
     hits: List[Hit]
     first_hit_index: np.int32

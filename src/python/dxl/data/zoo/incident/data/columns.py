@@ -47,7 +47,7 @@ class ShuffledHitsTable(ColumnsWithIndexInMemory):
         self.file.close()
 
     def get_dataclass(self):
-        if self.table[0]['hits'].shape[1] == 4:
+        if self.table.columns['hits'].shape[1] == 4:
             return Photon
         elif self.table[0]['hits'].shape[1] == 8:
             return Coincidence

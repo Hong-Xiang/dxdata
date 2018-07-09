@@ -5,6 +5,7 @@ import random
 from typing import List
 from ..data import Hit, ShuffledHits, ShuffledCoincidenceHits, Photon, Coincidence
 
+MAX_CRYSTAL_INDEX = 999999
 
 class ShuffleHits(Function):
     def __call__(self, photon: Photon):
@@ -49,7 +50,7 @@ class PaddingPhoton(Function):
         if len(p.hits) > self.padded_size:
             return p.update()
         hits = [h for h in p.hits]
-        hits += [p.hits[0].update(e=0.0)
+        hits += [p.hits[0].update(x=0.0, y=0.0, z=0.0, e=0.0, crystal_index=MAX_CRYSTAL_INDEX)
                  for _ in range(self.padded_size - len(p.hits))]
         return p.update(hits=hits,
                         nb_true_hits=len(p.hits))
@@ -62,29 +63,3 @@ def swap_photon(c: Coincidence):
 
 __all__ = ['random_shuffle_hits', 'just_add_index',
            'sort_hits_by_energy', 'PaddingPhoton', 'swap_photon']
-
-# def photon2shuffled_hits(padding_size: int, shuffle: ShuffledHits):
-#     return (x.hits
-#             >> shuffle
-#             >> MapByPosition(0, To(np.array)
-#                              >> Padding(padding_size, is_with_padded_size=True))
-#             >> MapWithUnpackArgsKwargs(append)
-#             >> Swap(1, 2)
-#             >> MapWithUnpackArgsKwargs(To(ShuffledHits)))
-
-
-# @function
-# def _merge_helper(shuffled_hits_list):
-#     sh0, sh1 = shuffled_hits_list
-#     hits0, hits1 = sh0.hits, sh1.hits
-#     hits = concatenate([hits0, hits1], 1)
-#     return ShuffledCoincidenceHits(hits, sh0.first_hit_index, sh0.padded_size)
-
-
-# def coincidence2shuffled_hits(padding_size: int, shuffle: ShuffledHits):
-#     return (x.photons
-#             >> NestMapOf(photon2shuffled_hits(padding_size, shuffle))
-#             >> _merge_helper)
-
-
-# __all__ += ['photon2shuffled_hits', 'coincidence2shuffled_hits']

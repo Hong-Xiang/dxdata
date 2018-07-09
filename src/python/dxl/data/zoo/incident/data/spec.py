@@ -14,14 +14,14 @@ class QuerySpec:
 
 class FeatureSpec:
     def __init__(self, main_feature=None, is_crystal_center=True,
-                 is_crystal_index=None, is_padding=None, shuffle=None):
+                 is_crystal_index=None, padding_size=None, shuffle=None):
         self.main_feature = main_feature
         self.is_crystal_center = is_crystal_center
         self.is_crystal_index = is_crystal_center
-        self.is_padding = is_padding
+        self.padding_size=padding_size
         self.shuffle = shuffle
 
     @property
     def _fields(self):
         return ('main_feature', 'is_crystal_center', 'is_crystal_index',
-                'is_padding', 'shuffle')
+                'padding_size', 'shuffle')
