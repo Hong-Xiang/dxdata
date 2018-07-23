@@ -1,7 +1,11 @@
+from typing import Generic, TypeVar, NamedTuple, Sequence
 from abc import ABCMeta, abstractproperty, abstractmethod
+from .control import Functor
+from .monoid import Monoid
 
+a = TypeVar('a')
 
-class Table(metaclass=ABCMeta):
+class Table(Functor[a], Monoid[a], Sequence[a]):
     """
     An unified table access of PyTable/pandas, etc.
 
@@ -23,9 +27,10 @@ class Table(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def fmap(self, f):
+    def iloc(self, l):
         pass
 
     @abstractproperty
-    def iloc(self):
+    def nb_rows(self):
         pass
+    

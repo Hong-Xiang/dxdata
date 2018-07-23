@@ -13,9 +13,5 @@ def assert_dimension(data, required_dimension, name=None, msg=None):
     """
     if data.ndim != required_dimension:
         if msg is None:
-            msg = "{name} dimension is required to be {required_dimension}, however got {got_dimension}."
-            raise ValueError(
-                msg.format(
-                    name=name,
-                    required_dimension=required_dimension,
-                    got_dimension=data.ndim))
+            msg = f"{name} dimension is required to be {required_dimension}, however got {data.ndim}."
+        raise ValueError(msg)
