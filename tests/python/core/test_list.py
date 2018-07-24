@@ -30,5 +30,18 @@ def test_fmap_type():
 def test_add_value():
     assert List([1]) + List([2]) == [1, 2]
 
+
 def test_add_type():
     assert isinstance(List([1]) + List([2]), List)
+
+
+def test_getitem_int():
+    assert List([1, 2])[0] == 1
+
+
+def test_getitem_slice_value():
+    assert List([1, 2, 3])[:2] == [1, 2]
+
+
+def test_getitem_slice_class():
+    assert isinstance(List([1, 2, 3])[:2], List)
