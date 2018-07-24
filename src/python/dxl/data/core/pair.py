@@ -23,7 +23,8 @@ class Pair(Functor[a], Generic[a, b]):
         return Pair(f(self.fst), self.snd)
 
     def fmap2(self, f: Callable[[a], c]) -> 'Pair[c, c]':
-        return Pair(f(self.fst), f(self.snd))
+        return self.fmap(f).flip().fmap(f).flip()
+        # return Pair(f(self.fst), f(self.snd))
 
     def reduce(self, f: Callable[[a, a], b]) -> b:
         return f(self.snd, self.fst)
