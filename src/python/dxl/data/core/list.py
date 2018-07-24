@@ -21,24 +21,15 @@ class List(UserList, Sequence[a], Functor[a], Monoid[a]):
         raise TypeError(
             f"List indices must be integers or slices, not {type(x)}")
 
-    def mappend(self, x: Union['List[a]', list]) -> 'List[a]':
-        x = List(x)
-        result_type = type(self) if self != self.empty() else type(x)
-        return List(self.data + [x])
+    def __add__(self, x: Union['List[a]', list]) -> 'List[a]':
+        return type(self)(self.data + List(x).data)
 
     def fmap(self, f: Callable[[a], b]) -> 'List[b]':
-        return List([f(x) for x in self.data])
+        return type(self)([f(x) for x in self.data])
 
-    @classmethod
-    def concat(cls, xs: Sequence['List[a]']) -> 'List[a]':
-        acc = cls.empty()
-        for x in xs:
-            acc += x
-        return acc
-
-    def apply(self, x: 'List[a]') -> 'List[b]':
-        # FIXME Applicative is not implemented yet, we may need to implement curry first.
-        result = []
-        for f in self.data:
-            result += x.fmap(lambda x: partial(f, x))
-        return List(result)
+    # def apply(self, x: 'List[a]') -> 'List[b]':
+    #     # FIXME Applicative is not implemented yet, we may need to implement curry first.
+    #     result = []
+    #     for f in self.data:
+    #         result += x.fmap(lambda x: partial(f, x))
+    #     return List(result)

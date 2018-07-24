@@ -1,7 +1,7 @@
 from abc import ABCMeta, abstractmethod, abstractclassmethod
 from typing import Callable, Union, List, Tuple, Dict, Generic, Callable, TypeVar
 import collections.abc
-from functools import singledispatch
+from functools import singledispatch, partial
 
 __all__ = ['Functor', 'fmap', 'Applicative', 'Monad']
 
@@ -9,41 +9,60 @@ a, b, c = TypeVar('a'), TypeVar('b'), TypeVar('c')
 
 
 class Functor(Generic[a]):
-    @abstractmethod
+    def __init__(self, data):
+        self.data = data
+
     def fmap(self, f: Callable[[a], b]) -> 'Functor[b]':
         """
         Returns TypeOfFunctor(f(self.data)),
         mimics fmap :: (a -> b) -> a -> b by
         fmap( fa ) -> type(fmap)(f(a))
         """
-        pass
+        return Functor(f(self.data))
 
 
 @singledispatch
 def _fmap(fct, f):
-    pass
+    raise TypeError(
+        f"Can't {type(f)} is not Functor or built-in Functor likes.")
+
+
+@_fmap.register(Functor)
+def _(fct, f):
+    return fct.fmap(f)
+
+
+@_fmap.register(list)
+def _(xs, f):
+    return [f(x) for x in xs]
+
+
+@_fmap.register(tuple)
+def _(xs, f):
+    return tuple([f(x) for x in xs])
+
+
+@_fmap.register(dict)
+def _(dct, f):
+    return {k: f(v) for k, v in dct.items()}
 
 
 FunctorB = Union[List, Tuple, Dict, Functor[a]]
 
 
-def fmap(f: Callable, fct: FunctorB, *, lazy=False) -> FunctorB:
-    if isinstance(fct, Functor):
-        return fct.fmap(f, lazy=lazy)
-    if isinstance(fct, (list, tuple)):
-        return type(fct)(map(f, fct))
-    if isinstance(fct, dict):
-        return {k: f(v) for k, v in fct.items()}
+def fmap(f: Callable, fct: FunctorB) -> FunctorB:
+    return _fmap(fct, f)
 
 
 class Applicative(Functor[a]):
-    @abstractmethod
-    def apply(self, x: Functor[a]) -> Functor[b]:
-        pass
+    def __init__(self, f):
+        self.f = f
 
-    @abstractclassmethod
-    def lift2(self, fa: Functor[Callable[[a, b], c]]) -> 'Applicative[Callable[[a], b]]':
-        ...
+    def fmap(self, f):
+        return Applicative(f(self.f))
+
+    def apply(self, x: Functor[a]) -> Functor[b]:
+        return self.fmap(lambda f: x.fmap(lambda x_: partial(f, x_)))
 
     def run(self) -> a:
         return self.fmap(lambda f: f())
@@ -52,4 +71,4 @@ class Applicative(Functor[a]):
 class Monad(Applicative[a]):
     @abstractmethod
     def __rshift__(self, f):
-        pass
+        return self.fmap(f)
