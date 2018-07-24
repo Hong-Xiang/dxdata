@@ -16,7 +16,7 @@ class DataClass:
             setattr(self, k, v)
             found.append(k)
         if len(found) < len(self.__slots__):
-            raise TypeError(f"TypeError: {type(self)} missing {len(__slots__) - len(found)}"
+            raise TypeError(f"TypeError: {type(self)} missing {len(self.__slots__) - len(found)}"
                             f" required positional arguments: {[n for n in self.__slots__ if not n in found]}")
 
     def replace(self, **kwargs):

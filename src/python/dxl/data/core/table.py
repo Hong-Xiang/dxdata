@@ -1,4 +1,4 @@
-from typing import Generic, TypeVar, NamedTuple, Sequence
+from typing import Generic, TypeVar, NamedTuple, Sequence, Union, Iterator
 from abc import ABCMeta, abstractproperty, abstractmethod
 from .control import Functor
 from .monoid import Monoid
@@ -18,19 +18,25 @@ class Table(Functor[a], Monoid[a], Sequence[a]):
 
     """
 
-    def __getitem__(self, labels, columns=None):
-        if isinstance(labels, int) and (isinstance(labels, slice) and isinstance(labels.start, int)):
-            return self.iloc[labels]
+    def __getitem__(self, i, columns=None) -> Union[a, Table[a]] :
+        if isinstance(i, int):
+            return self.at_row(i)
+        if isinstance(i, slice):
+            return self.slice_row(i) 
 
     @abstractmethod
-    def __iter__(self):
+    def __iter__(self) -> Iterator[a]:
         pass
 
     @abstractmethod
-    def iloc(self, l):
+    def at_row(self, i: int) -> a:
+        pass
+    
+    @abstractmethod
+    def slice_row(self, s: slice) -> Table[a]:
         pass
 
     @abstractproperty
-    def nb_rows(self):
+    def nb_rows(self) -> int:
         pass
     
