@@ -1,16 +1,20 @@
+from typing import Sequence, TypeVar, Union, Callable
 from collections import UserList
-from dxl.data.control import Monad, Applicative, Functor, Monoid
-from functools import partial
+from .control import Functor
+from .monoid import Monoid
+import dask.bag as db
 
-__all__ = ['List', 'ListFunc']
+a, b = TypeVar('a'), TypeVar('b')
+
+__all__ = ['List']
 
 
-class List(UserList, Functor, Monoid):
+class List(UserList, Sequence[a], Functor[a], Monoid[a]):
     @classmethod
-    def empty(self):
+    def empty(self) -> 'List':
         return List([])
 
-    def __getitem__(self, x):
+    def __getitem__(self, x) -> Union[a, 'List[a]', 'NoReturn']:
         if isinstance(x, int):
             return self.data[x]
         if isinstance(x, slice):
@@ -18,37 +22,16 @@ class List(UserList, Functor, Monoid):
         raise TypeError(
             f"List indices must be integers or slices, not {type(x)}")
 
-    def __add__(self, x: 'List'):
-        if isinstance(x, list):
-            x = List(x)
-        elif not isinstance(x, List):
-            raise TypeError(f"Can't add {type(self)} with {type(x)}")
-        result_type = type(self) if self != self.empty() else type(x)
-        return result_type(self.data + x)
+    def __add__(self, x: Union['List[a]', list]) -> 'List[a]':
+        return type(self)(self.data + List(x).data)
 
-    def fmap(self, f):
+    def fmap(self, f: Callable[[a], b]) -> 'List[b]':
         return type(self)([f(x) for x in self.data])
-    
-    @classmethod
-    def concat(cls, xs):
-        if isinstance(xs, list):
-            xs = List(xs)
-        result = cls.empty()
-        for x in xs:
-            result = result + x
-        return result
+        # return type(self)(db.from_sequence(self.data).map(f))
 
-class ListFunc(List, Applicative):
-    def apply(self, x: 'List'):
-        result = []
-        for f in self.data:
-            result += x.fmap(lambda x: partial(f, x))
-        return ListFunc(result)
-    
-    @classmethod
-    def from_(cls, xs):
-        if isinstance(xs, List):
-            return ListFunc(xs.data)
-        if isinstance(xs, list):
-            return ListFunc(xs)
-        raise TypeError(f"Can't convert {type(x)} to ListFunc.")
+    # def apply(self, x: 'List[a]') -> 'List[b]':
+    #     # FIXME Applicative is not implemented yet, we may need to implement curry first.
+    #     result = []
+    #     for f in self.data:
+    #         result += x.fmap(lambda x: partial(f, x))
+    #     return List(result)

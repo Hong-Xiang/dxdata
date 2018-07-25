@@ -2,45 +2,94 @@ from dxl.data import Functor
 from collections.abc import Iterable
 from abc import abstractproperty, ABC
 import numpy as np
+from typing import TypeVar
+import functools
+import operator
+
+T = TypeVar('TensorLike')
 
 
-class Tensor(Functor):
+class Tensor(Functor[T]):
     def __init__(self, data):
-        self.data = data
+        from dxl.function.tensor import to_tensor_like
+        self.data = to_tensor_like(data)
+
+    def join(self):
+        """
+        Return un-wrapped raw tensor.
+        """
+        return self.data
 
     @property
     def shape(self):
-        return list(self.data.shape)
+        from dxl.function.tensor import shape
+        return shape(self.data)
 
     @property
     def ndim(self):
-        return self.data.ndim
+        from dxl.function.tensor import ndim
+        return ndim(self.data)
+
+    @property
+    def size(self):
+        return functools.reduce(operator.mul, self.shape, 1)
 
     def __getitem__(self, s):
-        return self.data[s]
+        return self.fmap(lambda d: d[s])
 
     def __iter__(self):
-        if isinstance(self.data, Iterable):
-            return iter(self.data)
-        else:
-            return (self.__getitem__[i, ...] for i in range(self.shape[0]))
+        return self.fmap(iter)
 
     def fmap(self, f):
-        from dxl.function.tensor import list2tensor, BatchableFunction
-        if isinstance(f, BatchableFunction):
-            return Tensor(f(self.data))
-        else:
-            return Tensor(list2tensor([f(x) for x in self.__iter__()]))
+        return Tensor(f(self.data))
 
     def __eq__(self, t):
-        if self.shape != list(t.shape):
-            return False
-        if isinstance(t, Tensor):
-            t = t.data
-        if isinstance(self.data, np.ndarray):
-            return np.allclose(self.data, t)
+        return self.fmap(lambda d: d == t)
 
+    def __req__(self, t):
+        return self.fmap(lambda d: t == d)
 
-def is_tensor(t):
-    if isinstance(t, Tensor):
-        return True
+    def __mul__(self, t):
+        return self.fmap(lambda d: d * t)
+
+    def __rmul__(self, t):
+        return self.fmap(lambda d: t * d)
+
+    def __matmul__(self, t):
+        return self.fmap(lambda d: d @ m)
+
+    def __rmatmaul__(self, t):
+        return self.fmap(lambda d: m@d)
+
+    def __add__(self, t):
+        return self.fmap(lambda d: d + x)
+
+    def __radd__(self, t):
+        return self.fmap(lambda d: x + d)
+
+    def __sub__(self, t):
+        return self.fmap(lambda d: d - t)
+
+    def __rsub__(self, t):
+        return self.fmap(lambda d: t - d)
+
+    def __truediv__(self, t):
+        return self.fmap(lambda d: d / t)
+
+    def __rtruediv__(self, t):
+        return self.fmap(lambda d: t / d)
+
+    def __floordiv__(self, t):
+        return self.fmap(lambda d: d // t)
+
+    def __floordiv__(self, t):
+        return self.fmap(lambda d: t // d)
+
+    def __mod__(self, t):
+        return self.fmap(lambda d: d % t)
+
+    def __rmod__(self, t):
+        return self.fmap(lambda d: t % d)
+
+    def __repr__(self):
+        return repr(self.data)

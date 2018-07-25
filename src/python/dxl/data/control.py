@@ -3,7 +3,7 @@ from typing import Callable, Union, List, Tuple, Dict, Generic, Callable, TypeVa
 import collections.abc
 from functools import singledispatch, partial
 
-__all__ = ['Functor', 'fmap', 'Applicative', 'Monad']
+__all__ = ['Functor', 'Applicative', 'Monad']
 
 a, b, c = TypeVar('a'), TypeVar('b'), TypeVar('c')
 
@@ -21,39 +21,6 @@ class Functor(Generic[a]):
         return Functor(f(self.data))
 
 
-@singledispatch
-def _fmap(fct, f):
-    raise TypeError(
-        f"Can't {type(f)} is not Functor or built-in Functor likes.")
-
-
-@_fmap.register(Functor)
-def _(fct, f):
-    return fct.fmap(f)
-
-
-@_fmap.register(list)
-def _(xs, f):
-    return [f(x) for x in xs]
-
-
-@_fmap.register(tuple)
-def _(xs, f):
-    return tuple([f(x) for x in xs])
-
-
-@_fmap.register(dict)
-def _(dct, f):
-    return {k: f(v) for k, v in dct.items()}
-
-
-FunctorB = Union[List, Tuple, Dict, Functor[a]]
-
-
-def fmap(f: Callable, fct: FunctorB) -> FunctorB:
-    return _fmap(fct, f)
-
-
 class Applicative(Functor[a]):
     def __init__(self, f):
         self.f = f
@@ -69,6 +36,10 @@ class Applicative(Functor[a]):
 
 
 class Monad(Applicative[a]):
+    def __rshift__(self, f: Callable[[a], b]) -> 'Monad[b]':
+        """ Alias to bind """
+        return self.bind(f)
+
     @abstractmethod
-    def __rshift__(self, f):
+    def bind(self, f: Callable[[a], b]) -> 'Monad[b]':
         return self.fmap(f)
