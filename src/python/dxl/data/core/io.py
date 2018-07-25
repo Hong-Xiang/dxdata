@@ -1,4 +1,4 @@
-from .control import Monad
+from dxl.data.control import Monad
 from typing import TypeVar, Callable
 
 a, b = TypeVar('a'), TypeVar('b')

@@ -10,6 +10,9 @@ T = TypeVar('TensorLike')
 
 
 class Tensor(Functor[T]):
+    # HACK for radd to work
+    __array_priority__ = 16
+
     def __init__(self, data):
         from dxl.function.tensor import to_tensor_like
         self.data = to_tensor_like(data)
@@ -35,12 +38,23 @@ class Tensor(Functor[T]):
         return functools.reduce(operator.mul, self.shape, 1)
 
     def __getitem__(self, s):
-        return self.fmap(lambda d: d[s])
+        result = self.fmap(lambda d: d[s])
+        # HACK unbox scalar
+        if result.ndim == 0:
+            return result.join()
+        return result
+
+    def __setitem__(self, s, v):
+        def _assign(t):
+            t[s] = v
+            return t
+        return self.fmap(_assign)
 
     def __iter__(self):
         return self.fmap(iter)
 
     def fmap(self, f):
+        result = f(self.data)
         return Tensor(f(self.data))
 
     def __eq__(self, t):
@@ -56,16 +70,20 @@ class Tensor(Functor[T]):
         return self.fmap(lambda d: t * d)
 
     def __matmul__(self, t):
-        return self.fmap(lambda d: d @ m)
+        if isinstance(t, Tensor):
+            t = t.join()
+        return Tensor(self.join() @ t)
 
     def __rmatmaul__(self, t):
-        return self.fmap(lambda d: m@d)
+        if isinstance(t, Tensor):
+            t = t.join()()
+        return Tensor(t @ self.join())
 
     def __add__(self, t):
-        return self.fmap(lambda d: d + x)
+        return self.fmap(lambda d: d + t)
 
     def __radd__(self, t):
-        return self.fmap(lambda d: x + d)
+        return self.fmap(lambda d: t + d)
 
     def __sub__(self, t):
         return self.fmap(lambda d: d - t)
@@ -93,3 +111,6 @@ class Tensor(Functor[T]):
 
     def __repr__(self):
         return repr(self.data)
+
+    def __str__(self):
+        return str(self.data)

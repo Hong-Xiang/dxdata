@@ -1,7 +1,7 @@
 from typing import Sequence, TypeVar, Union, Callable
 from collections import UserList
-from .control import Functor
-from .monoid import Monoid
+from dxl.data.control import Functor
+from dxl.data.monoid import Monoid
 import dask.bag as db
 
 a, b = TypeVar('a'), TypeVar('b')
