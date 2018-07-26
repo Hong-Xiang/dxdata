@@ -79,6 +79,9 @@ class Tensor(Functor[T]):
             t = t.join()()
         return Tensor(t @ self.join())
 
+    def __len__(self):
+        return len(self.join())
+
     def __add__(self, t):
         return self.fmap(lambda d: d + t)
 
@@ -108,6 +111,9 @@ class Tensor(Functor[T]):
 
     def __rmod__(self, t):
         return self.fmap(lambda d: t % d)
+
+    def __neg__(self):
+        return self.fmap(lambda d: -d)
 
     def __repr__(self):
         return repr(self.data)

@@ -12,6 +12,10 @@ class Vector(Tensor[T]):
 
     def __matmul__(self, t):
         from .matrix import Matrix
+        from dxl.function.tensor import transpose
+        # HACK for v @ t.T
+        if len(t.shape) == 2 and t.shape[0] == 1 and t.shape[1] == self.size:
+            return self @ transpose(t)
         return scalar_or_vector_of(Tensor(self) @ Tensor(t), t)
 
     def __rmatmul__(self, t):
@@ -29,6 +33,12 @@ class Vector(Tensor[T]):
     @property
     def z(self):
         return self[2]
+
+    @classmethod
+    def one_hot(cls, n, l):
+        v = [0.0 for _ in range(l)]
+        v[n] = 1.0
+        return Vector(v)
 
 
 def scalar_or_vector_of(result, t):

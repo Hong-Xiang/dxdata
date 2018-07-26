@@ -1,4 +1,5 @@
 from .tensor import Tensor
+import numpy as np
 
 
 class Matrix(Tensor):
@@ -26,3 +27,19 @@ class Matrix(Tensor):
         if isinstance(t, Vector):
             return Vector(result)
         return Matrix(result)
+
+    # TODO improve impl of following methods
+
+    @classmethod
+    def eye(cls, n):
+        return Matrix(np.eye(n))
+
+    @classmethod
+    def one_hot(cls, ij, sz):
+        if isinstance(sz, int):
+            sz = (sz, sz)
+        if isinstance(ij, int):
+            ij = (ij, ij)
+        m = np.zeros(sz)
+        m[ij[0], ij[1]] = 1.0
+        return Matrix(m)
