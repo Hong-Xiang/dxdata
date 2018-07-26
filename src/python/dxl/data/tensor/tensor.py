@@ -6,6 +6,7 @@ from typing import TypeVar
 import functools
 import operator
 
+
 T = TypeVar('TensorLike')
 
 
@@ -39,10 +40,9 @@ class Tensor(Functor[T]):
 
     def __getitem__(self, s):
         result = self.fmap(lambda d: d[s])
+        from dxl.function.tensor import as_scalar
         # HACK unbox scalar
-        if result.ndim == 0:
-            return result.join()
-        return result
+        return result if not is_result_scalar(result, s) else as_scalar(result)
 
     def __setitem__(self, s, v):
         def _assign(t):
@@ -114,3 +114,11 @@ class Tensor(Functor[T]):
 
     def __str__(self):
         return str(self.data)
+
+
+def is_result_scalar(result, s):
+    if result.ndim == 0 or isinstance(s, int):
+        return True
+    if isinstance(s, tuple) and all(map(lambda x: isinstance(x, int), s)):
+        return True
+    return False

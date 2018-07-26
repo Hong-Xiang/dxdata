@@ -12,17 +12,11 @@ class Vector(Tensor[T]):
 
     def __matmul__(self, t):
         from .matrix import Matrix
-        result = Tensor(self) @ Tensor(t)
-        if isinstance(t, Vector):
-            return result
-        return Vector(result)
+        return scalar_or_vector_of(Tensor(self) @ Tensor(t), t)
 
     def __rmatmul__(self, t):
         from .matrix import Matrix
-        result = Tensor(t) @ Tensor(self)
-        if isinstance(t, Vector):
-            return result
-        return Vector(result)
+        return scalar_or_vector_of(Tensor(t) @ Tensor(self), t)
 
     @property
     def x(self):
@@ -35,3 +29,12 @@ class Vector(Tensor[T]):
     @property
     def z(self):
         return self[2]
+
+
+def scalar_or_vector_of(result, t):
+    from dxl.function.tensor import as_scalar
+    return as_scalar(result) if is_result_scalar(t) else Vector(result)
+
+
+def is_result_scalar(t):
+    return isinstance(t, Vector)
