@@ -1,11 +1,7 @@
 from abc import ABC, abstractproperty
-from .control import Functor
+from dxl.data.control import Functor
 from typing import Generic, TypeVar, Callable
 import operator
-
-
-def identity(x): return x
-
 
 a, b, c = TypeVar('a'), TypeVar('b'), TypeVar('c')
 
@@ -23,7 +19,7 @@ class Pair(Functor[a], Generic[a, b]):
         return Pair(f(self.fst), self.snd)
 
     def fmap2(self, f: Callable[[a], c]) -> 'Pair[c, c]':
-        return Pair(f(self.fst), f(self.snd))
+        return self.fmap(f).flip().fmap(f).flip()
 
     def reduce(self, f: Callable[[a, a], b]) -> b:
         return f(self.snd, self.fst)
@@ -33,11 +29,3 @@ class Pair(Functor[a], Generic[a, b]):
 
     def __repr__(self) -> str:
         return f"<Pair({self.fst}, {self.snd})>"
-
-
-class NumPair(Pair):
-    def add(self):
-        return self.reduce(operator.add)
-
-    def sub(self):
-        return self.reduce(operator.sub)

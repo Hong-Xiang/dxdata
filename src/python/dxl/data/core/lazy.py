@@ -1,4 +1,4 @@
-from .control import Functor
+from dxl.data.control import Functor
 from abc import ABC, abstractmethod
 
 

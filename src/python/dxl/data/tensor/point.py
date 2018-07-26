@@ -1,6 +1,5 @@
 import numpy as np
 
-
 class Point:
     def __init__(self, data):
         self.data = np.array(data)

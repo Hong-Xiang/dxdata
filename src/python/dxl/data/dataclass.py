@@ -34,7 +34,7 @@ class DataClass:
         return all(getattr(self, k) == getattr(others, k) for k in self.__slots__)
 
     def __hash__(self):
-        return hash(tuple(map(getattr(self, self.__slots__))))
+        return hash(tuple(map(lambda n: getattr(self, n), self.__slots__)))
 
     @classmethod
     def fields(cls):
