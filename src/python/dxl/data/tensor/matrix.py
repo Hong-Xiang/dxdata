@@ -21,4 +21,8 @@ class Matrix(Tensor):
         return Vector(result) if ndim(result) <= 1 else Matrix(result)
 
     def __rmatmaul__(self, t):
-        return Matrix(Tensor(t) @ Tensor(self))
+        from .vector import Vector
+        result = Tensor(t) @ Tensor(self)
+        if isinstance(t, Vector):
+            return Vector(result)
+        return Matrix(result)

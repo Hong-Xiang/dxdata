@@ -15,7 +15,7 @@ class Vector(Tensor[T]):
         result = Tensor(self) @ Tensor(t)
         if isinstance(t, Vector):
             return result
-        return Matrix(result)
+        return Vector(result)
 
     def __rmatmul__(self, t):
         from .matrix import Matrix
