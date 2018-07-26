@@ -112,6 +112,9 @@ class Tensor(Functor[T]):
     def __rmod__(self, t):
         return self.fmap(lambda d: t % d)
 
+    def __neg__(self):
+        return self.fmap(lambda d: -d)
+
     def __repr__(self):
         return repr(self.data)
 
