@@ -41,3 +41,4 @@ from .dataclass import DataClass
 # from .core import *
 from .function import *
 from .collections import *
+from .maybe import Maybe
