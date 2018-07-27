@@ -1,9 +1,9 @@
 from dxl.data.control import Monad
-from functools import partial
+from functools import partial, wraps
 import inspect
 from typing import Callable, Union, Generic
 
-__all__ = ['Function']
+__all__ = ['Function', 'func']
 
 from typing import TypeVar
 
@@ -35,8 +35,12 @@ class Function(Monad[a], Generic[a, b]):
             return self(mid, *args[f.nargs:])
         return Function(foo, nargs=self.nargs - f.nargs + 1)
 
+
     # def __rshift__(self, f):
         # return Function(lambda *args, **kwargs: f(self.f(*args, **kwargs)), nargs=self.nargs-1)
 
     # def apply(self, x):
         # return Function(partial(self.__call__, x))
+
+def func(f):
+    return wraps(f)(Function(f))
