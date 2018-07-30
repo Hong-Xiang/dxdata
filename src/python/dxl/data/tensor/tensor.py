@@ -51,7 +51,8 @@ class Tensor(Functor[T]):
         return self.fmap(_assign)
 
     def __iter__(self):
-        return self.fmap(iter)
+        from dxl.function.tensor import is_scalar, as_scalar
+        return (Tensor(x) if not is_scalar(x) else as_scalar(x) for x in self.join())
 
     def fmap(self, f):
         result = f(self.data)

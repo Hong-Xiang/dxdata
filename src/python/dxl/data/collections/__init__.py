@@ -1,2 +1,2 @@
-from .list import List
+from .list import *
 from .pair import Pair
