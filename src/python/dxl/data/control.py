@@ -3,7 +3,7 @@ from typing import Callable, Union, List, Tuple, Dict, Generic, Callable, TypeVa
 import collections.abc
 from functools import singledispatch, partial
 
-__all__ = ['Functor', 'Applicative', 'Monad']
+__all__ = ['Functor', 'Applicative', 'Monad', 'SingleFunctor']
 
 a, b, c = TypeVar('a'), TypeVar('b'), TypeVar('c')
 
@@ -19,6 +19,20 @@ class Functor(Generic[a]):
         fmap( fa ) -> type(fmap)(f(a))
         """
         return Functor(f(self.data))
+
+
+class SingleFunctor(Functor[Functor[a]]):
+    def __init__(self, data: Functor[b]):
+        self.data = data
+
+    def fmap(self, f: Callable[[b], c]):
+        return SimpleWrap(self.data.fmap(f))
+
+    def join_to(self, type_):
+        raise NotImplementedError
+
+    def join(self):
+        return self.data
 
 
 class Applicative(Functor[a]):

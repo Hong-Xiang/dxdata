@@ -8,6 +8,8 @@ a, b = TypeVar('a'), TypeVar('b')
 
 __all__ = ['List', 'LazyList']
 
+class ListBase(Sequence[a], Functor[a], Monoid[a]):
+    pass
 
 class List(UserList, Sequence[a], Functor[a], Monoid[a]):
     @classmethod
@@ -32,7 +34,7 @@ class List(UserList, Sequence[a], Functor[a], Monoid[a]):
         return type(self)([f(x) for x in self.join()])
 
     def head(self):
-        return self.join()
+        return self.join()[0]
 
     def tail(self):
         return self.fmap(lambda xs: xs[1:])
@@ -44,6 +46,9 @@ class List(UserList, Sequence[a], Functor[a], Monoid[a]):
     #         result += x.fmap(lambda x: partial(f, x))
     #     return List(result)
 
+class ListFixedStride(List[a]):
+    def __init__(self):
+        pass
 
 import itertools
 

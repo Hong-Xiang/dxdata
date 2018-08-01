@@ -1,7 +1,7 @@
 class DataClass:
     """
     Dataclass mixin.
-    Requires: __slots__
+    Requires: __slots__ 
     """
 
     def __init__(self, *args, **kwargs):
@@ -44,4 +44,7 @@ class DataClass:
         return {k: getattr(self, k) for k in self.fields()}
 
     def astuple(self):
-        return tuple((getattr(self, k) for k in self.fields))
+        return tuple((getattr(self, k) for k in self.fields()))
+
+
+

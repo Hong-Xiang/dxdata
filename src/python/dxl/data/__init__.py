@@ -35,7 +35,7 @@ cloud or through micro service.
 
 """
 
-from .control import Functor, Applicative, Monad
+from .control import *
 from .monoid import Monoid
 from .dataclass import DataClass
 # from .core import *
