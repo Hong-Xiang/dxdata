@@ -36,6 +36,10 @@ class DataClass:
     def __hash__(self):
         return hash(tuple(map(lambda n: getattr(self, n), self.__slots__)))
 
+    def __getitem__(self, k):
+        if k in self.__slots__:
+            return getattr(self, k)
+
     @classmethod
     def fields(cls):
         return tuple(cls.__slots__)
@@ -45,6 +49,3 @@ class DataClass:
 
     def astuple(self):
         return tuple((getattr(self, k) for k in self.fields()))
-
-
-

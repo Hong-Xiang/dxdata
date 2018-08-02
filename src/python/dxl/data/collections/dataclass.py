@@ -15,8 +15,10 @@ class DataCollection(Sequence[a], Functor[a], Monoid[a]):
 
 
 class DataList(DataCollection[a], List[a]):
-    def __init__(self, dataclass, data):
+    def __init__(self, data, dataclass=None):
         super().__init__(data)
+        if dataclass is None:
+            dataclass = type(data[0])
         self.dataclass = dataclass
 
     def fmap(self, f):
@@ -28,7 +30,7 @@ class DataList(DataCollection[a], List[a]):
 
 
 class DataArray(Sequence[a], Functor[a]):
-    def __init__(self, dataclass, data):
+    def __init__(self, data, dataclass):
         self.data = data
         self.dataclass = dataclass
 
@@ -56,4 +58,21 @@ class DataArray(Sequence[a], Functor[a]):
         return f"<DataArray({self.dataclass}, {self.join()})>"
 
 
+from dxl.data import ChainableIterable
 
+
+class DataIterable(ChainableIterable):
+    def __init__(self, data, dataclass=None):
+        from dxl.function import head
+        self.data = data
+        if dataclass is None:
+            dataclass = type(head(data))
+        self.dataclass = dataclass
+
+    def join(self):
+        return self.data
+
+    def fmap(self, f):
+        from dxl.function import head
+        result = f(head(self.join()))
+        return DataIterable(type(result), self.data.fmap(f))
